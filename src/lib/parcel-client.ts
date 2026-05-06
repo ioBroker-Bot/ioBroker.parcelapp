@@ -1,28 +1,9 @@
 import * as https from "node:https";
+import { isTrueish } from "./coerce";
 import type { ParcelApiResponse, ParcelDelivery, AddDeliveryRequest, AddDeliveryResponse, CarrierMap } from "./types";
 
 const API_BASE = "https://api.parcel.app/external";
 const REQUEST_TIMEOUT = 15_000;
-
-/**
- * Coerce API-drift boolean responses. parcel.app should return a real boolean
- * for `success`, but the guard accepts common string/number encodings too.
- *
- * @param v Value to interpret as a success flag
- */
-function isTrueish(v: unknown): boolean {
-  if (typeof v === "boolean") {
-    return v;
-  }
-  if (typeof v === "number") {
-    return v === 1;
-  }
-  if (typeof v === "string") {
-    const s = v.toLowerCase();
-    return s === "true" || s === "1";
-  }
-  return false;
-}
 
 /** HTTP client for the parcel.app API */
 export class ParcelClient {

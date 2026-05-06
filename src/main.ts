@@ -1,4 +1,6 @@
 import * as utils from "@iobroker/adapter-core";
+import { errText } from "./lib/coerce";
+import { tLog } from "./lib/i18n-logs";
 import { ParcelClient } from "./lib/parcel-client";
 import { StateManager } from "./lib/state-manager";
 
@@ -6,15 +8,6 @@ const MIN_POLL_INTERVAL = 5;
 const MAX_POLL_INTERVAL = 60;
 const DEFAULT_POLL_INTERVAL = 10;
 const MIN_POLL_GAP_MS = 60_000; // Minimum 60s between polls
-
-/**
- * Extract a log-friendly message from an unknown error value.
- *
- * @param err Value caught in a promise rejection (may or may not be an Error)
- */
-function errText(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
 
 /** ioBroker adapter for parcel.app package tracking */
 class ParcelappAdapter extends utils.Adapter {
@@ -28,6 +21,8 @@ class ParcelappAdapter extends utils.Adapter {
   private failedDeliveries = new Set<string>();
   private unhandledRejectionHandler: ((reason: unknown) => void) | null = null;
   private uncaughtExceptionHandler: ((err: Error) => void) | null = null;
+  /** ioBroker system language — read once in `onReady` from `system.config`. EN fallback. */
+  private systemLang: string = "en";
 
   /** @param options Adapter options */
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
@@ -39,40 +34,45 @@ class ParcelappAdapter extends utils.Adapter {
     // unhandled promise rejection (which would SIGKILL the adapter and trap
     // js-controller in a restart loop without any stack trace).
     this.on("ready", () => {
-      this.onReady().catch(err => this.log.error(`onReady failed: ${errText(err)}`));
+      this.onReady().catch(err => this.log.error(tLog(this.systemLang, "onReadyFailed", { error: errText(err) })));
     });
     this.on("unload", this.onUnload.bind(this));
     this.on("message", obj => {
-      this.onMessage(obj).catch(err => this.log.error(`onMessage failed: ${errText(err)}`));
+      this.onMessage(obj).catch(err =>
+        this.log.error(tLog(this.systemLang, "onMessageFailed", { error: errText(err) })),
+      );
     });
     // Last-line-of-defence against unhandled rejections / sync throws from
     // fire-and-forget paths (e.g. `void this.poll()`). The per-handler
     // .catch() wrappers cover the documented async paths; this catches
     // anything that slips past during refactors.
     this.unhandledRejectionHandler = (reason: unknown) => {
-      this.log.error(`Unhandled rejection: ${errText(reason)}`);
+      this.log.error(tLog(this.systemLang, "unhandledRejection", { error: errText(reason) }));
     };
     this.uncaughtExceptionHandler = (err: Error) => {
-      this.log.error(`Uncaught exception: ${errText(err)}`);
+      this.log.error(tLog(this.systemLang, "uncaughtException", { error: errText(err) }));
     };
     process.on("unhandledRejection", this.unhandledRejectionHandler);
     process.on("uncaughtException", this.uncaughtExceptionHandler);
   }
 
   private async onReady(): Promise<void> {
+    // Pick the system language up-front so all user-facing logs go out in the
+    // user's language. StateManager also gets it for state-name localization.
+    const sysConfig = await this.getForeignObjectAsync("system.config");
+    const language = (sysConfig?.common as { language?: string } | undefined)?.language ?? "";
+    if (typeof language === "string" && language.length > 0) {
+      this.systemLang = language;
+    }
+
     await this.setStateAsync("info.connection", { val: false, ack: true });
 
     // Validate config
     const { apiKey } = this.config;
     if (!apiKey || apiKey.trim().length < 10) {
-      this.log.error("No valid API key configured — please enter your parcel.app API key in the adapter settings");
+      this.log.error(tLog(this.systemLang, "noApiKey"));
       return;
     }
-
-    // Pick the label language from the ioBroker system configuration.
-    // StateManager falls back to English if the language is unsupported.
-    const sysConfig = await this.getForeignObjectAsync("system.config");
-    const language = (sysConfig?.common as { language?: string } | undefined)?.language ?? "";
 
     // Initialize
     this.client = new ParcelClient(apiKey.trim());
@@ -92,7 +92,7 @@ class ParcelappAdapter extends utils.Adapter {
     const intervalMs = interval * 60 * 1000;
     this.pollTimer = this.setInterval(() => void this.poll(), intervalMs);
 
-    this.log.info(`Parcel tracking started — polling every ${interval} minutes`);
+    this.log.info(tLog(this.systemLang, "trackingStarted", { minutes: interval }));
   }
 
   private onUnload(callback: () => void): void {
@@ -161,8 +161,7 @@ class ParcelappAdapter extends utils.Adapter {
           this.sendTo(obj.from, obj.command, { error: "Unknown command" }, obj.callback);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.sendTo(obj.from, obj.command, { success: false, error_message: msg }, obj.callback);
+      this.sendTo(obj.from, obj.command, { success: false, error_message: errText(err) }, obj.callback);
     }
   }
 
@@ -238,7 +237,7 @@ class ParcelappAdapter extends utils.Adapter {
       // Reset error state on success
       this.rateLimitedUntil = 0;
       if (this.lastErrorCode) {
-        this.log.info("Connection restored");
+        this.log.info(tLog(this.systemLang, "connectionRestored"));
         this.lastErrorCode = "";
       }
       await this.setStateAsync("info.connection", { val: true, ack: true });
@@ -256,11 +255,11 @@ class ParcelappAdapter extends utils.Adapter {
           activeIds.push(this.stateManager.packageId(delivery));
           this.failedDeliveries.delete(delivery.tracking_number);
         } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
+          const msg = errText(err);
           if (this.failedDeliveries.has(delivery.tracking_number)) {
             this.log.debug(`Failed to update "${delivery.tracking_number}": ${msg}`);
           } else {
-            this.log.warn(`Failed to update "${delivery.tracking_number}": ${msg}`);
+            this.log.warn(tLog(this.systemLang, "updateFailed", { tracking: delivery.tracking_number, error: msg }));
             this.failedDeliveries.add(delivery.tracking_number);
           }
         }
@@ -287,19 +286,19 @@ class ParcelappAdapter extends utils.Adapter {
       if (error.code === "RATE_LIMITED") {
         const cooldownSec = error.retryAfterSeconds || 5 * 60;
         this.rateLimitedUntil = Date.now() + cooldownSec * 1000;
-        this.log.warn(`Rate limit hit — pausing API requests for ${Math.ceil(cooldownSec / 60)} minute(s)`);
+        this.log.warn(tLog(this.systemLang, "rateLimitHit", { minutes: Math.ceil(cooldownSec / 60) }));
       } else if (error.code === "INVALID_API_KEY") {
         // Always log — user must fix config
-        this.log.error("Invalid API key — please check your parcel.app API key");
+        this.log.error(tLog(this.systemLang, "invalidApiKey"));
       } else if (isRepeat) {
         // Same error as last time — don't spam the log
         this.log.debug(`Poll failed (ongoing): ${error.message}`);
       } else if (errorCode === "NETWORK") {
-        this.log.warn(`Cannot reach parcel.app API — will keep retrying`);
+        this.log.warn(tLog(this.systemLang, "cannotReach"));
       } else if (errorCode === "TIMEOUT") {
-        this.log.warn(`API request timeout — will retry next cycle`);
+        this.log.warn(tLog(this.systemLang, "apiTimeout"));
       } else {
-        this.log.error(`Poll failed: ${error.message}`);
+        this.log.error(tLog(this.systemLang, "pollFailed", { error: error.message }));
       }
 
       await this.setStateAsync("info.connection", { val: false, ack: true });

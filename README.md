@@ -1,7 +1,7 @@
 # ioBroker.parcelapp
 
 [![npm version](https://img.shields.io/npm/v/iobroker.parcelapp)](https://www.npmjs.com/package/iobroker.parcelapp)
-![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
+![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![npm downloads](https://img.shields.io/npm/dt/iobroker.parcelapp)](https://www.npmjs.com/package/iobroker.parcelapp)
@@ -11,7 +11,7 @@
 
 <img src="https://raw.githubusercontent.com/krobipd/ioBroker.parcelapp/main/admin/parcelapp.svg" width="100" />
 
-ioBroker adapter that connects to the [parcel.app](https://parcelapp.net) API and exposes package tracking data as ioBroker states — including delivery status, time windows, and tracking events. Supports all carriers that parcel.app tracks.
+ioBroker adapter for the [parcel.app](https://parcelapp.net) API. Supports all carriers that parcel.app tracks.
 
 ---
 
@@ -21,19 +21,18 @@ ioBroker adapter that connects to the [parcel.app](https://parcelapp.net) API an
 - **Per-package ioBroker states** — carrier, status, tracking number, delivery window, last event, last location
 - **Summary states** — active count, today count, combined delivery window
 - **Delivery time estimates** — today, tomorrow, in X days with combined time window
-- **Automatic polling** with configurable interval (5–60 minutes)
+- **Configurable poll interval** (5–60 minutes)
 - **Configurable cleanup** — auto-remove delivered packages or keep them until deleted in parcel.app
 - **Add deliveries** via sendTo message from scripts or other adapters
 - **Admin UI** with connection test and polling settings
-- **Status labels follow the ioBroker system language** — all 11 supported languages (de, en, ru, pt, nl, fr, it, es, pl, uk, zh-cn), English fallback for unknown codes
 
 ---
 
 ## Requirements
 
-- **Node.js >= 20**
+- **Node.js >= 22**
 - **ioBroker js-controller >= 7.0.7**
-- **ioBroker Admin >= 7.7.22**
+- **ioBroker Admin >= 7.8.23**
 - **parcel.app Premium subscription** — required for API access
 
 ---
@@ -119,6 +118,11 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 ---
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+- State names now follow your ioBroker system language (11 languages). User-visible info/warn/error logs are localized too.
+- Minimum requirements: Node.js 22 and ioBroker Admin 7.8.23.
+
 ### 0.3.2 (2026-05-01)
 - Documentation: rewrote release notes for v0.2.14–v0.3.1 in user-friendly style across all languages.
 

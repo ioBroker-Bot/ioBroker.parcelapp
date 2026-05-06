@@ -6,7 +6,7 @@
 
 **ioBroker Parcel Tracking Adapter** — Paketverfolgung über [parcel.app](https://parcelapp.net) API. Alle Carrier die parcel.app unterstützt, ein API-Key (Premium).
 
-- **Version:** 0.3.0 (in progress — DRY-Cleanup: STATUS_LABELS_DE/EN-Aliases raus + Tests auf STATUS_LABELS.de/en umgestellt; format/format:check npm-scripts ergänzt; Master-Sync für dependabot.yml + repochecker-version-gate Job-Block (M1000 → sources-dist-stable))
+- **Version:** 0.3.2 (2026-05-01 — Changelog-User-Sicht-Rewrite über alle 11 Sprachen)
 - **GitHub:** https://github.com/krobipd/ioBroker.parcelapp
 - **npm:** https://www.npmjs.com/package/iobroker.parcelapp
 - **Repository PR:** ioBroker/ioBroker.repositories#5667 (re-review pending bei mcm1957)

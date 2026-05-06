@@ -22,17 +22,12 @@ __export(state_manager_exports, {
   resolveLanguage: () => resolveLanguage
 });
 module.exports = __toCommonJS(state_manager_exports);
+var import_coerce = require("./coerce");
+var import_i18n_states = require("./i18n-states");
 var import_types = require("./types");
 const TRACKABLE_STATUSES = /* @__PURE__ */ new Set([2, 4, 8]);
-function coerceNumber(v) {
-  if (typeof v === "number" && Number.isFinite(v)) {
-    return v;
-  }
-  if (typeof v === "string" && v.length > 0) {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : null;
-  }
-  return null;
+function asName(name) {
+  return name;
 }
 const ESTIMATE_LABELS = {
   de: {
@@ -112,6 +107,14 @@ class StateManager {
   adapter;
   language;
   /**
+   * Cache of state IDs that have already passed `setObjectNotExistsAsync`.
+   * Skips repeat DB lookups on the hot path — each poll touches ~11 states
+   * per delivery, and most deliveries see no schema change between polls.
+   * On `cleanupDeliveries`, IDs of removed packages are dropped so a re-add
+   * triggers a fresh creation.
+   */
+  createdIds = /* @__PURE__ */ new Set();
+  /**
    * @param adapter The ioBroker adapter instance
    * @param language Language code from system.config.language (falls back to English)
    */
@@ -183,35 +186,53 @@ class StateManager {
     const labels = import_types.STATUS_LABELS[this.language];
     const statusText = labels[statusCode] || `Unknown (${statusCode})`;
     await Promise.all([
-      this.createAndSet(`${devicePath}.carrier`, "Carrier", "string", "text", carrierName),
-      this.createAndSet(`${devicePath}.status`, "Status", "string", "text", statusText),
-      this.createAndSet(`${devicePath}.statusCode`, "Status Code", "number", "value", statusCode),
-      this.createAndSet(`${devicePath}.description`, "Description", "string", "text", description),
-      this.createAndSet(`${devicePath}.trackingNumber`, "Tracking Number", "string", "text", trackingNumber),
-      this.createAndSet(`${devicePath}.extraInfo`, "Extra Information", "string", "text", extraInfo),
+      this.createAndSet(`${devicePath}.carrier`, asName((0, import_i18n_states.tName)("carrier")), "string", "text", carrierName),
+      this.createAndSet(`${devicePath}.status`, asName((0, import_i18n_states.tName)("status")), "string", "text", statusText),
+      this.createAndSet(`${devicePath}.statusCode`, asName((0, import_i18n_states.tName)("statusCode")), "number", "value", statusCode),
+      this.createAndSet(`${devicePath}.description`, asName((0, import_i18n_states.tName)("description")), "string", "text", description),
+      this.createAndSet(
+        `${devicePath}.trackingNumber`,
+        asName((0, import_i18n_states.tName)("trackingNumber")),
+        "string",
+        "text",
+        trackingNumber
+      ),
+      this.createAndSet(`${devicePath}.extraInfo`, asName((0, import_i18n_states.tName)("extraInfo")), "string", "text", extraInfo),
       this.createAndSet(
         `${devicePath}.deliveryWindow`,
-        "Delivery Window",
+        asName((0, import_i18n_states.tName)("deliveryWindow")),
         "string",
         "text",
         this.calculateDeliveryWindow(delivery, statusCode)
       ),
       this.createAndSet(
         `${devicePath}.deliveryEstimate`,
-        "Delivery Estimate",
+        asName((0, import_i18n_states.tName)("deliveryEstimate")),
         "string",
         "text",
         this.calculateDeliveryEstimate(delivery, statusCode)
       ),
-      this.createAndSet(`${devicePath}.lastEvent`, "Last Event", "string", "text", this.formatLastEvent(delivery)),
+      this.createAndSet(
+        `${devicePath}.lastEvent`,
+        asName((0, import_i18n_states.tName)("lastEvent")),
+        "string",
+        "text",
+        this.formatLastEvent(delivery)
+      ),
       this.createAndSet(
         `${devicePath}.lastLocation`,
-        "Last Location",
+        asName((0, import_i18n_states.tName)("lastLocation")),
         "string",
         "text",
         this.extractLastLocation(delivery)
       ),
-      this.createAndSet(`${devicePath}.lastUpdated`, "Last Updated", "string", "date", (/* @__PURE__ */ new Date()).toISOString())
+      this.createAndSet(
+        `${devicePath}.lastUpdated`,
+        asName((0, import_i18n_states.tName)("lastUpdated")),
+        "string",
+        "date",
+        (/* @__PURE__ */ new Date()).toISOString()
+      )
     ]);
   }
   /**
@@ -223,11 +244,17 @@ class StateManager {
   async updateSummary(activeDeliveries) {
     const todayDeliveries = activeDeliveries.filter((d) => this.isToday(d, this.parseStatus(d)));
     await Promise.all([
-      this.createAndSet("summary.activeCount", "Active Deliveries", "number", "value", activeDeliveries.length),
-      this.createAndSet("summary.todayCount", "Deliveries Today", "number", "value", todayDeliveries.length),
+      this.createAndSet(
+        "summary.activeCount",
+        asName((0, import_i18n_states.tName)("activeCount")),
+        "number",
+        "value",
+        activeDeliveries.length
+      ),
+      this.createAndSet("summary.todayCount", asName((0, import_i18n_states.tName)("todayCount")), "number", "value", todayDeliveries.length),
       this.createAndSet(
         "summary.deliveryWindow",
-        "Combined Delivery Window",
+        asName((0, import_i18n_states.tName)("summaryDeliveryWindow")),
         "string",
         "text",
         this.calculateCombinedWindow(todayDeliveries)
@@ -250,6 +277,11 @@ class StateManager {
       if (relativeId.startsWith("deliveries.") && !activeSet.has(relativeId)) {
         await this.adapter.delObjectAsync(relativeId, { recursive: true });
         this.adapter.log.debug(`Removed stale delivery: ${relativeId}`);
+        for (const id of this.createdIds) {
+          if (id === relativeId || id.startsWith(`${relativeId}.`)) {
+            this.createdIds.delete(id);
+          }
+        }
       }
     }
   }
@@ -264,7 +296,7 @@ class StateManager {
       return "";
     }
     const formatTime = (timestamp) => {
-      const ts = coerceNumber(timestamp);
+      const ts = (0, import_coerce.coerceFiniteNumber)(timestamp);
       if (ts === null || ts <= 0) {
         return null;
       }
@@ -293,7 +325,7 @@ class StateManager {
       return null;
     }
     let expectedDate = null;
-    const ts = coerceNumber(delivery.timestamp_expected);
+    const ts = (0, import_coerce.coerceFiniteNumber)(delivery.timestamp_expected);
     if (ts !== null && ts > 0) {
       expectedDate = new Date(ts * 1e3);
     } else if (typeof delivery.date_expected === "string" && delivery.date_expected.length > 0) {
@@ -404,20 +436,25 @@ class StateManager {
     return `${times[0].start} - ${times[times.length - 1].end}`;
   }
   /**
-   * Create/extend a read-only state and set its value.
+   * Create/extend a read-only state and set its value. Skips the
+   * `setObjectNotExistsAsync` round-trip once the ID is in the cache —
+   * states are static after first creation; only the value changes per poll.
    *
    * @param id State ID relative to adapter namespace
-   * @param name Display name
+   * @param name Display name (translation object or plain string)
    * @param type Value type
    * @param role ioBroker role
    * @param val Value to set
    */
   async createAndSet(id, name, type, role, val) {
-    await this.adapter.setObjectNotExistsAsync(id, {
-      type: "state",
-      common: { name, type, role, read: true, write: false },
-      native: {}
-    });
+    if (!this.createdIds.has(id)) {
+      await this.adapter.setObjectNotExistsAsync(id, {
+        type: "state",
+        common: { name, type, role, read: true, write: false },
+        native: {}
+      });
+      this.createdIds.add(id);
+    }
     await this.adapter.setStateAsync(id, { val, ack: true });
   }
 }

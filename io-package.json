@@ -3,6 +3,19 @@
     "name": "parcelapp",
     "version": "0.3.2",
     "news": {
+      "NEXT": {
+        "en": "State names now follow your ioBroker system language across 11 languages. User-visible info/warn/error logs are localized too. Min Node 22, Admin 7.8.23.",
+        "de": "Datenpunkt-Namen folgen jetzt der ioBroker-Systemsprache in 11 Sprachen. User-sichtbare info/warn/error-Logs ebenfalls lokalisiert. Min Node 22, Admin 7.8.23.",
+        "ru": "Имена датчиков теперь следуют системному языку ioBroker на 11 языках. Пользовательские info/warn/error логи также локализованы. Мин. Node 22, Admin 7.8.23.",
+        "pt": "Nomes dos datapoints seguem agora o idioma do sistema ioBroker em 11 idiomas. Logs info/warn/error visíveis ao utilizador também localizados. Mín. Node 22, Admin 7.8.23.",
+        "nl": "Datapointnamen volgen nu je ioBroker-systeemtaal in 11 talen. Voor de gebruiker zichtbare info/warn/error-logs ook gelokaliseerd. Min. Node 22, Admin 7.8.23.",
+        "fr": "Les noms des datapoints suivent désormais la langue système ioBroker en 11 langues. Logs info/warn/error visibles localisés. Min Node 22, Admin 7.8.23.",
+        "it": "I nomi dei datapoint seguono ora la lingua di sistema ioBroker in 11 lingue. Log info/warn/error visibili agli utenti localizzati. Min Node 22, Admin 7.8.23.",
+        "es": "Los nombres de datapoints siguen ahora el idioma del sistema ioBroker en 11 idiomas. Logs info/warn/error visibles al usuario localizados. Mín. Node 22, Admin 7.8.23.",
+        "pl": "Nazwy datapointów podążają teraz za językiem systemu ioBroker w 11 językach. Widoczne dla użytkownika logi info/warn/error również zlokalizowane. Min Node 22, Admin 7.8.23.",
+        "uk": "Імена датапоінтів тепер слідують системній мові ioBroker 11 мовами. Користувачу видимі info/warn/error логи також локалізовані. Мін. Node 22, Admin 7.8.23.",
+        "zh-cn": "数据点名称现在遵循 ioBroker 系统语言（11 种语言）。用户可见的 info/warn/error 日志也已本地化。最低 Node 22、Admin 7.8.23。"
+      },
       "0.3.2": {
         "en": "Documentation: rewrote release notes in user-friendly style across all languages.",
         "de": "Dokumentation: Release-Notes in alle Sprachen User-orientiert neu geschrieben.",
@@ -109,17 +122,17 @@
       "zh-cn": "包裹追踪"
     },
     "desc": {
-      "en": "ioBroker adapter for parcel.app — track packages as ioBroker states",
-      "de": "ioBroker-Adapter für parcel.app — Pakete als ioBroker-States verfolgen",
-      "ru": "Адаптер ioBroker для parcel.app — отслеживание посылок как состояния ioBroker",
-      "pt": "Adaptador ioBroker para parcel.app — rastreie pacotes como estados ioBroker",
-      "nl": "ioBroker-adapter voor parcel.app — volg pakketten als ioBroker-states",
-      "fr": "Adaptateur ioBroker pour parcel.app — suivez vos colis comme états ioBroker",
-      "it": "Adattatore ioBroker per parcel.app — traccia pacchi come stati ioBroker",
-      "es": "Adaptador ioBroker para parcel.app — rastrea paquetes como estados ioBroker",
-      "pl": "Adapter ioBroker dla parcel.app — śledź przesyłki jako stany ioBroker",
-      "uk": "Адаптер ioBroker для parcel.app — відстеження посилок як стани ioBroker",
-      "zh-cn": "parcel.app 的 ioBroker 适配器 — 将包裹追踪数据作为 ioBroker 状态"
+      "en": "ioBroker adapter for the parcel.app API. Supports all carriers that parcel.app tracks.",
+      "de": "ioBroker-Adapter für die parcel.app-API. Unterstützt alle Carrier, die parcel.app verfolgt.",
+      "ru": "ioBroker-адаптер для API parcel.app. Поддерживает всех перевозчиков, которых отслеживает parcel.app.",
+      "pt": "Adaptador ioBroker para a API parcel.app. Suporta todas as transportadoras que parcel.app rastreia.",
+      "nl": "ioBroker-adapter voor de parcel.app-API. Ondersteunt alle vervoerders die parcel.app volgt.",
+      "fr": "Adaptateur ioBroker pour l'API parcel.app. Prend en charge tous les transporteurs suivis par parcel.app.",
+      "it": "Adattatore ioBroker per l'API parcel.app. Supporta tutti i corrieri tracciati da parcel.app.",
+      "es": "Adaptador ioBroker para la API de parcel.app. Compatible con todos los transportistas que parcel.app rastrea.",
+      "pl": "Adapter ioBroker dla API parcel.app. Obsługuje wszystkich przewoźników śledzonych przez parcel.app.",
+      "uk": "Адаптер ioBroker для API parcel.app. Підтримує всіх перевізників, яких відстежує parcel.app.",
+      "zh-cn": "用于 parcel.app API 的 ioBroker 适配器。支持 parcel.app 跟踪的所有承运商。"
     },
     "authors": [
       "krobi <krobi@power-dreams.com>"
@@ -162,7 +175,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.7.22"
+        "admin": ">=7.8.23"
       }
     ]
   },

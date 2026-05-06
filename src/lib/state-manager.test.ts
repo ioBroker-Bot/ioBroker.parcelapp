@@ -19,11 +19,16 @@ interface ObjectViewRow {
   value: unknown;
 }
 
+interface MockAdapterMetrics {
+  setObjectNotExistsCalls: number;
+}
+
 interface MockAdapter {
   namespace: string;
   config: { autoRemoveDelivered: boolean };
   objects: Map<string, ObjectDef>;
   states: Map<string, StateValue>;
+  metrics: MockAdapterMetrics;
   log: { debug: (msg: string) => void };
   extendObjectAsync: (id: string, obj: Partial<ObjectDef>) => Promise<void>;
   setObjectNotExistsAsync: (id: string, obj: ObjectDef) => Promise<void>;
@@ -40,12 +45,14 @@ function createMockAdapter(): MockAdapter {
   const objects = new Map<string, ObjectDef>();
   const states = new Map<string, StateValue>();
   const debugMessages: string[] = [];
+  const metrics: MockAdapterMetrics = { setObjectNotExistsCalls: 0 };
 
   return {
     namespace: "parcelapp.0",
     config: { autoRemoveDelivered: true },
     objects,
     states,
+    metrics,
     log: {
       debug: (msg: string): void => {
         debugMessages.push(msg);
@@ -60,6 +67,7 @@ function createMockAdapter(): MockAdapter {
       });
     },
     setObjectNotExistsAsync: async (id: string, obj: ObjectDef): Promise<void> => {
+      metrics.setObjectNotExistsCalls++;
       if (!objects.has(id)) {
         objects.set(id, obj);
       }
@@ -1259,6 +1267,89 @@ describe("StateManager", () => {
         const count = adapter.states.get("summary.todayCount")?.val;
         expect(count, `todayCount in ${lang}`).to.equal(1);
       }
+    });
+  });
+
+  describe("translation-objects on common.name (T1)", () => {
+    interface CommonNameTranslated {
+      en: string;
+      de: string;
+      [key: string]: string;
+    }
+
+    it("delivery state common.name is a translation object (en + de)", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "de");
+      const delivery = makeDelivery();
+      await manager.updateDelivery(delivery, "DHL");
+      const pkgId = manager.packageId(delivery);
+      const carrier = adapter.objects.get(`deliveries.${pkgId}.carrier`);
+      const name = carrier!.common.name as CommonNameTranslated;
+      expect(name.en).to.equal("Carrier");
+      expect(name.de).to.equal("Versanddienst");
+    });
+
+    it("summary state common.name is a translation object", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "de");
+      await manager.updateSummary([]);
+      const active = adapter.objects.get("summary.activeCount");
+      const name = active!.common.name as CommonNameTranslated;
+      expect(name.en).to.equal("Active Deliveries");
+      expect(name.de).to.equal("Aktive Sendungen");
+    });
+
+    it("statusCode common.name is translated", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "de");
+      const delivery = makeDelivery();
+      await manager.updateDelivery(delivery, "DHL");
+      const pkgId = manager.packageId(delivery);
+      const obj = adapter.objects.get(`deliveries.${pkgId}.statusCode`);
+      const name = obj!.common.name as CommonNameTranslated;
+      expect(name.en).to.equal("Status Code");
+      expect(name.de).to.equal("Status-Code");
+    });
+  });
+
+  describe("createdIds cache (T4 — hot-path performance)", () => {
+    it("calls setObjectNotExistsAsync only once per state across repeated updates", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "en");
+      const delivery = makeDelivery();
+      await manager.updateDelivery(delivery, "DHL");
+      const firstPass = adapter.metrics.setObjectNotExistsCalls;
+      // Same delivery, second poll cycle — values may change, schema doesn't.
+      await manager.updateDelivery({ ...delivery, status_code: "4" }, "DHL");
+      expect(adapter.metrics.setObjectNotExistsCalls).to.equal(firstPass);
+      // Value updated:
+      const pkgId = manager.packageId(delivery);
+      expect(adapter.states.get(`deliveries.${pkgId}.statusCode`)?.val).to.equal(4);
+    });
+
+    it("summary states cache: two updateSummary calls hit setObjectNotExistsAsync only on the first", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "en");
+      await manager.updateSummary([]);
+      const firstPass = adapter.metrics.setObjectNotExistsCalls;
+      await manager.updateSummary([]);
+      expect(adapter.metrics.setObjectNotExistsCalls).to.equal(firstPass);
+    });
+
+    it("cleanupDeliveries clears the cache for removed packages so re-add re-creates states", async () => {
+      const adapter = createMockAdapter();
+      const manager = new StateManager(adapter as never, "en");
+      const delivery = makeDelivery({ tracking_number: "TRK_REMOVE_ME" });
+      const pkgId = manager.packageId(delivery);
+      await manager.updateDelivery(delivery, "DHL");
+      const before = adapter.metrics.setObjectNotExistsCalls;
+      // Cleanup removes it (passing an empty active list).
+      await manager.cleanupDeliveries([]);
+      // Re-add: must hit setObjectNotExists again because the cache was cleared.
+      await manager.updateDelivery(delivery, "DHL");
+      expect(adapter.metrics.setObjectNotExistsCalls).to.be.greaterThan(before);
+      // And the states are back.
+      expect(adapter.states.get(`deliveries.${pkgId}.carrier`)?.val).to.equal("DHL");
     });
   });
 });

@@ -32,21 +32,9 @@ __export(parcel_client_exports, {
 });
 module.exports = __toCommonJS(parcel_client_exports);
 var https = __toESM(require("node:https"));
+var import_coerce = require("./coerce");
 const API_BASE = "https://api.parcel.app/external";
 const REQUEST_TIMEOUT = 15e3;
-function isTrueish(v) {
-  if (typeof v === "boolean") {
-    return v;
-  }
-  if (typeof v === "number") {
-    return v === 1;
-  }
-  if (typeof v === "string") {
-    const s = v.toLowerCase();
-    return s === "true" || s === "1";
-  }
-  return false;
-}
 class ParcelClient {
   apiKey;
   carrierCache = null;
@@ -66,7 +54,7 @@ class ParcelClient {
       err.code = "API_ERROR";
       throw err;
     }
-    if (!isTrueish(response.success)) {
+    if (!(0, import_coerce.isTrueish)(response.success)) {
       const rawCode = typeof response.error_code === "string" ? response.error_code : "";
       const rawMsg = typeof response.error_message === "string" ? response.error_message : "";
       const code = rawCode || rawMsg || "UNKNOWN";

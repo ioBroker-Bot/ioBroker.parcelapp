@@ -1,7 +1,7 @@
 {
   "name": "iobroker.parcelapp",
   "version": "0.3.2",
-  "description": "ioBroker adapter for parcel.app — track packages as ioBroker states",
+  "description": "ioBroker adapter for the parcel.app API",
   "author": {
     "name": "krobi",
     "email": "krobi@power-dreams.com"
@@ -27,7 +27,7 @@
     "url": "https://github.com/krobipd/ioBroker.parcelapp"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "npm": ">=10"
   },
   "dependencies": {
@@ -40,9 +40,9 @@
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/testing": "^5.2.2",
-    "@tsconfig/node20": "^20.1.9",
+    "@tsconfig/node22": "^22.0.5",
     "@types/iobroker": "npm:@iobroker/types@^7.1.1",
-    "@types/node": "^20.19.24",
+    "@types/node": "^22.19.17",
     "nyc": "^17.1.0",
     "rimraf": "^6.1.3",
     "source-map-support": "^0.5.21",
