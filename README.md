@@ -118,7 +118,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 ---
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.4.0 (2026-05-06)
 
 - State names now follow your ioBroker system language (11 languages). User-visible info/warn/error logs are localized too.
 - Minimum requirements: Node.js 22 and ioBroker Admin 7.8.23.

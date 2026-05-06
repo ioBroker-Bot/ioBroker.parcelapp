@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "news": {
-      "NEXT": {
+      "0.4.0": {
         "en": "State names now follow your ioBroker system language across 11 languages. User-visible info/warn/error logs are localized too. Min Node 22, Admin 7.8.23.",
         "de": "Datenpunkt-Namen folgen jetzt der ioBroker-Systemsprache in 11 Sprachen. User-sichtbare info/warn/error-Logs ebenfalls lokalisiert. Min Node 22, Admin 7.8.23.",
         "ru": "Имена датчиков теперь следуют системному языку ioBroker на 11 языках. Пользовательские info/warn/error логи также локализованы. Мин. Node 22, Admin 7.8.23.",
