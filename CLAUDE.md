@@ -6,13 +6,13 @@
 
 **ioBroker Parcel Tracking Adapter** — Paketverfolgung über [parcel.app](https://parcelapp.net) API. Alle Carrier die parcel.app unterstützt, ein API-Key (Premium).
 
-- **Version:** 0.3.2 (2026-05-01 — Changelog-User-Sicht-Rewrite über alle 11 Sprachen)
+- **Version:** 0.4.0 (2026-05-06 — Multi-Language + lib/coerce.ts + state-creation cache + May-2026 baseline)
 - **GitHub:** https://github.com/krobipd/ioBroker.parcelapp
 - **npm:** https://www.npmjs.com/package/iobroker.parcelapp
 - **Repository PR:** ioBroker/ioBroker.repositories#5667 (re-review pending bei mcm1957)
 - **Runtime-Deps:** nur `@iobroker/adapter-core` (HTTPS via Node.js built-in)
 - **Test-Setup:** offizieller ioBroker.example/TypeScript-Standard — Tests unter `src/**/*.test.ts` direkt mit `ts-node/register`, kein separater Build (siehe globales `reference_iobroker_test_setup_standard`)
-- **`@types/node` an `engines.node`-Min gekoppelt:** `^20.x` weil `engines.node: ">=20"`. Dependabot ignoriert Major-Bumps (siehe `dependabot.yml`).
+- **`@types/node` + `@tsconfig/nodeXX` an `engines.node`-Min gekoppelt:** `^22.x` / `@tsconfig/node22` weil `engines.node: ">=22"`. Dependabot ignoriert Major-Bumps.
 
 ## API
 
@@ -25,10 +25,13 @@
 ## Architektur
 
 ```
-src/main.ts              → Adapter (Polling, Lifecycle, sendTo)
-src/lib/types.ts         → Interfaces, Status-Labels
+src/main.ts              → Adapter (Polling, Lifecycle, sendTo, systemLang)
+src/lib/types.ts         → Interfaces, Status-Labels (11 Sprachen)
+src/lib/coerce.ts        → errText, coerceFiniteNumber strict, coerceString, coerceBoolean, isPlainObject, isTrueish
 src/lib/parcel-client.ts → HTTPS-Client (Node.js built-in)
-src/lib/state-manager.ts → State CRUD + Cleanup + Berechnungen
+src/lib/state-manager.ts → State CRUD + Cleanup + Berechnungen + createdIds-Cache
+src/lib/i18n-logs.ts     → 14 LOG_STRINGS-Keys × 11 Sprachen + tLog(lang, key, params)
+src/lib/i18n-states.ts   → 14 STATE_NAMES × 11 Sprachen + tName(key) für common.name
 ```
 
 ## Design-Entscheidungen
@@ -47,11 +50,13 @@ src/lib/state-manager.ts → State CRUD + Cleanup + Berechnungen
 
 0=Zugestellt, 1=Eingefroren, 2=Unterwegs, 3=Abholung, 4=In Zustellung, 5=Nicht gefunden, 6=Zustellversuch, 7=Ausnahme, 8=Registriert
 
-## Tests
+## Tests (174 unit + 57 package + 1 integration = 232)
 
 ```
-src/lib/parcel-client.test.ts  → API client, errors, rate limiting, API-drift
-src/lib/state-manager.test.ts  → Deliveries, summary, cleanup, formatting, API-drift, multilang, resolveLanguage, isToday-regression
+src/lib/coerce.test.ts         → errText, coerceFiniteNumber strict (HEX/Exp rejected), coerceString, coerceBoolean, isPlainObject, isTrueish (~25)
+src/lib/i18n-logs.test.ts      → tLog + EN-Fallback + Token-Substitution + 11-Sprachen-Coverage (8)
+src/lib/parcel-client.test.ts  → API client gegen lokalen HTTP-Mock-Server, errors, rate limiting, API-drift (36)
+src/lib/state-manager.test.ts  → Deliveries, summary, cleanup, formatting, API-drift, multilang, translation-objects (T1), createdIds cache (T4) (105)
 test/package.js                → @iobroker/testing packageFiles
 test/integration.js            → @iobroker/testing integration
 test/mocharc.custom.json       → Mocha-Config mit ts-node/register (lädt mocha.setup.js)
@@ -65,6 +70,7 @@ Run: `npm test` (mocha auf src/\*_/_.test.ts via ts-node + @iobroker/testing pac
 
 | Version | Highlights                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.4.0   | Multi-Language komplett: 14 user-facing info/warn/error logs (`lib/i18n-logs.ts` + `tLog(lang, key, params)`) und 14 datapoint-Namen (`lib/i18n-states.ts` + `tName(key)`) in 11 Sprachen. NEU `lib/coerce.ts` mit `errText`, `coerceFiniteNumber` strict (DECIMAL_NUMBER_RE), `coerceString`, `coerceBoolean`, `isPlainObject`, `isTrueish` (Helper aus 3 Files konsolidiert). `state-manager.ts` mit `createdIds`-Set für Hot-Path-Cache (~110 setObjectNotExists-Calls/Poll gespart). May-2026-Baseline: Node 22 + Admin 7.8.23 + @tsconfig/node22. README-Subtitle gestrafft, Multi-Language-Bullet aus Features raus (UX-Polish, kein Feature). Tests 137 → 174 unit (+37). Erstes Tag deploy-failed wegen Node 22+npm@latest MODULE_NOT_FOUND, Workflow auf Node 24 für deploy-Step gefixt. |
 | 0.3.0   | DRY-Cleanup: tote `STATUS_LABELS_DE`/`STATUS_LABELS_EN`-Aliases aus `types.ts` raus, Tests auf `STATUS_LABELS.de`/`STATUS_LABELS.en` direkt umgestellt. `format` + `format:check` npm-scripts ergänzt (analog hassemu). Master-Sync: `.github/dependabot.yml` (ignore-Block für `actions/checkout` + `actions/setup-node` Major-Bumps) + `repochecker-version-gate` Job-Block in `test-and-release.yml` von M1000-Logik auf sources-dist-stable Master-Snippet umgestellt. |
 | 0.2.18  | Audit-Cleanup gegen ioBroker.example/TypeScript-Vollstandard: `@types/node` von `^25.6.0` auf `^20.19.24` zurück (an `engines.node: ">=20"` gekoppelt), dependabot blockt Major-Bumps für `@types/node` + `typescript` + `eslint`, `nyc`-Config + `coverage`-Script ergänzt, `prettier.config.mjs` analog hassemu, verwaiste `auto-merge.yml` gelöscht                                                                                                                     |
 | 0.2.17  | Test-Setup auf upstream `ioBroker.example/TypeScript`-Standard zurückgeführt: `tsconfig.test.json` + `build-test/` raus, Tests unter `src/**/*.test.ts` direkt mit `ts-node/register`, neue `test/mocharc.custom.json` + `test/mocha.setup.js` + `test/tsconfig.json` + `test/.eslintrc.json`                                                                                                                                                                              |
