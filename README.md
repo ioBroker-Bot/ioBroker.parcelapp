@@ -118,9 +118,17 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 ---
 
 ## Changelog
+<!--
+    Placeholder for the next version (at the beginning of the line):
+    ### **WORK IN PROGRESS**
+-->
+### **WORK IN PROGRESS**
+
+- Adapter log messages are now English only, in line with the ioBroker community standard. Localized state names (11 languages) are unchanged.
+
 ### 0.4.0 (2026-05-06)
 
-- State names now follow your ioBroker system language (11 languages). User-visible info/warn/error logs are localized too.
+- State names now follow your ioBroker system language (11 languages).
 - Minimum requirements: Node.js 22 and ioBroker Admin 7.8.23.
 
 ### 0.3.2 (2026-05-01)
