@@ -122,7 +122,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.4.1 (2026-05-09)
 
 - Adapter log messages are now English only, in line with the ioBroker community standard. Localized state names (11 languages) are unchanged.
 
@@ -138,9 +138,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 - Documentation cleanup. No code changes.
 
 ### 0.3.0 (2026-04-30)
-- Internal cleanup. No user-facing changes.
-
-### 0.2.18 (2026-04-28)
 - Internal cleanup. No user-facing changes.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
