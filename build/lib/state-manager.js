@@ -176,13 +176,21 @@ class StateManager {
     this.idOwner.set(id, rawKey);
     return id;
   }
-  /** v0.4.2 (S3): build a stable raw-key for collision tracking. */
+  /**
+   * v0.4.2 (S3): build a stable raw-key for collision tracking.
+   *
+   * @param delivery The delivery whose raw tracking identifies it.
+   */
   static rawIdKey(delivery) {
     const t = typeof delivery.tracking_number === "string" ? delivery.tracking_number : "";
     const e = typeof delivery.extra_information === "string" ? delivery.extra_information : "";
     return `${t}\0${e}`;
   }
-  /** v0.4.2 (S3): FNV-1a 32-bit short hash → 6 hex chars. */
+  /**
+   * v0.4.2 (S3): FNV-1a 32-bit short hash → 6 hex chars.
+   *
+   * @param s Input string to hash.
+   */
   static shortHash(s) {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) {

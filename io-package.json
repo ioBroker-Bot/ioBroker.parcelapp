@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "news": {
-      "NEXT": {
+      "0.4.2": {
         "en": "Adapter shuts down cleanly when parcel.app is slow, 403 Forbidden gives a 'check Premium' hint instead of reauth-loop, two trackings with the same sanitized id no longer overwrite.",
         "de": "Adapter beendet sauber wenn parcel.app langsam ist, 403-Fehler liefert 'Premium prüfen'-Hinweis statt Reauth-Loop, und zwei Trackings mit identischer Sanitize-ID überschreiben sich nicht mehr.",
         "ru": "Адаптер корректно завершается при медленной parcel.app, 403 даёт подсказку 'проверьте Premium' вместо цикла переавторизации, два трекинга с одинаковым ID больше не перезаписываются.",

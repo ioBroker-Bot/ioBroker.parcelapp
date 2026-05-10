@@ -122,7 +122,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.4.2 (2026-05-10)
 
 - Adapter shuts down cleanly even if parcel.app is slow — pending requests are aborted instead of hanging until kill.
 - "Forbidden" responses (e.g. when the Premium subscription is no longer active) now log a clear hint pointing to your parcel.app account, instead of looping reauth as if the API key were just wrong.
@@ -143,9 +143,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 
 ### 0.3.1 (2026-05-01)
 - Documentation cleanup. No code changes.
-
-### 0.3.0 (2026-04-30)
-- Internal cleanup. No user-facing changes.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
