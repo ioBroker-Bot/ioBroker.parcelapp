@@ -20,6 +20,14 @@ class ParcelappAdapter extends utils.Adapter {
   private rateLimitedUntil = 0;
   private lastErrorCode = "";
   private failedDeliveries = new Set<string>();
+  /**
+   * v0.4.4: short-lived test-clients spawned from `checkConnection` admin
+   * messages. The prod-`this.client` is what `onUnload` cancels, so these
+   * need their own registry to be reachable at shutdown. Without this, an
+   * admin clicking "Test Connection" right before adapter-stop could keep
+   * the process alive past js-controller's 4-second kill deadline.
+   */
+  private testClients = new Set<ParcelClient>();
   private unhandledRejectionHandler: ((reason: unknown) => void) | null = null;
   private uncaughtExceptionHandler: ((err: Error) => void) | null = null;
   /** ioBroker system language — read once in `onReady` from `system.config`. EN fallback. */
@@ -133,6 +141,13 @@ class ParcelappAdapter extends utils.Adapter {
       // parcel.app endpoint doesn't keep the adapter alive past
       // js-controller's 4-second kill deadline.
       this.client?.cancelAll();
+      // v0.4.4: also abort any short-lived test-client (from checkConnection)
+      // whose HTTPS-request might still be inflight at shutdown — the prod
+      // `this.client.cancelAll()` only touches the production-client.
+      for (const tc of this.testClients) {
+        tc.cancelAll();
+      }
+      this.testClients.clear();
       if (this.unhandledRejectionHandler) {
         process.off("unhandledRejection", this.unhandledRejectionHandler);
         this.unhandledRejectionHandler = null;
@@ -177,10 +192,18 @@ class ParcelappAdapter extends utils.Adapter {
           // v0.4.3: same debug-logger as the prod client so checkConnection
           // failures get the same HTTPS-layer trace.
           const testClient = new ParcelClient(key, { debug: (m: string) => this.log.debug(m) });
-          const result = await testClient.testConnection();
-          // v0.4.3 (F3): trace checkConnection result.
-          this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
-          this.sendTo(obj.from, obj.command, result, obj.callback);
+          // v0.4.4: register test-client so onUnload can abort its inflight
+          // HTTPS-request — the adapter's `this.client.cancelAll()` only
+          // touches the prod-client, not these short-lived test-clients.
+          this.testClients.add(testClient);
+          try {
+            const result = await testClient.testConnection();
+            // v0.4.3 (F3): trace checkConnection result.
+            this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
+            this.sendTo(obj.from, obj.command, result, obj.callback);
+          } finally {
+            this.testClients.delete(testClient);
+          }
           break;
         }
         case "addDelivery": {

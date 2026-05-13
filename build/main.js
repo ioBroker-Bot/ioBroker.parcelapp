@@ -39,6 +39,14 @@ class ParcelappAdapter extends utils.Adapter {
   rateLimitedUntil = 0;
   lastErrorCode = "";
   failedDeliveries = /* @__PURE__ */ new Set();
+  /**
+   * v0.4.4: short-lived test-clients spawned from `checkConnection` admin
+   * messages. The prod-`this.client` is what `onUnload` cancels, so these
+   * need their own registry to be reachable at shutdown. Without this, an
+   * admin clicking "Test Connection" right before adapter-stop could keep
+   * the process alive past js-controller's 4-second kill deadline.
+   */
+  testClients = /* @__PURE__ */ new Set();
   unhandledRejectionHandler = null;
   uncaughtExceptionHandler = null;
   /** ioBroker system language — read once in `onReady` from `system.config`. EN fallback. */
@@ -112,6 +120,10 @@ class ParcelappAdapter extends utils.Adapter {
         this.pollTimer = void 0;
       }
       (_a = this.client) == null ? void 0 : _a.cancelAll();
+      for (const tc of this.testClients) {
+        tc.cancelAll();
+      }
+      this.testClients.clear();
       if (this.unhandledRejectionHandler) {
         process.off("unhandledRejection", this.unhandledRejectionHandler);
         this.unhandledRejectionHandler = null;
@@ -144,9 +156,14 @@ class ParcelappAdapter extends utils.Adapter {
             return;
           }
           const testClient = new import_parcel_client.ParcelClient(key, { debug: (m) => this.log.debug(m) });
-          const result = await testClient.testConnection();
-          this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
-          this.sendTo(obj.from, obj.command, result, obj.callback);
+          this.testClients.add(testClient);
+          try {
+            const result = await testClient.testConnection();
+            this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
+            this.sendTo(obj.from, obj.command, result, obj.callback);
+          } finally {
+            this.testClients.delete(testClient);
+          }
           break;
         }
         case "addDelivery": {
