@@ -3,6 +3,19 @@
     "name": "parcelapp",
     "version": "0.4.2",
     "news": {
+      "NEXT": {
+        "en": "Debug log traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling. Default log unchanged.",
+        "de": "Debug-Log dokumentiert stille Pfade: HTTPS-Request-Lifecycle, Carrier-Liste, Per-Paket-Updates und Admin-Message-Handling. Default-Log unverändert.",
+        "ru": "Журнал отладки прослеживает тихие пути: цикл HTTPS-запроса, получение списка перевозчиков, обновления посылок и обработка сообщений. Стандартный лог не изменился.",
+        "pt": "Log de depuração rastreia caminhos silenciosos: ciclo HTTPS, lista de transportadoras, atualizações por encomenda e mensagens admin. Log padrão inalterado.",
+        "nl": "Debug-log volgt stille paden: HTTPS-cyclus, vervoerderslijst, pakketupdates en admin-berichten. Standaard log ongewijzigd.",
+        "fr": "Le journal de débogage trace les chemins silencieux : cycle HTTPS, liste des transporteurs, mises à jour de colis et messages admin. Journal par défaut inchangé.",
+        "it": "Log di debug traccia percorsi silenziosi: ciclo HTTPS, elenco corrieri, aggiornamenti pacchi e messaggi admin. Log predefinito invariato.",
+        "es": "Log de depuración rastrea rutas silenciosas: ciclo HTTPS, lista de transportistas, actualizaciones de paquetes y mensajes de admin. Log por defecto sin cambios.",
+        "pl": "Log debugowania śledzi ciche ścieżki: cykl HTTPS, lista przewoźników, aktualizacje paczek i wiadomości admin. Domyślny log bez zmian.",
+        "uk": "Журнал зневадження відстежує тихі шляхи: цикл HTTPS, список перевізників, оновлення посилок та повідомлення адміна. Стандартний лог без змін.",
+        "zh-cn": "调试日志跟踪以前静默的路径：HTTPS 请求生命周期、承运商列表、每个包裹更新以及管理消息处理。默认日志保持不变。"
+      },
       "0.4.2": {
         "en": "Adapter shuts down cleanly when parcel.app is slow, 403 Forbidden gives a 'check Premium' hint instead of reauth-loop, two trackings with the same sanitized id no longer overwrite.",
         "de": "Adapter beendet sauber wenn parcel.app langsam ist, 403-Fehler liefert 'Premium prüfen'-Hinweis statt Reauth-Loop, und zwei Trackings mit identischer Sanitize-ID überschreiben sich nicht mehr.",
@@ -69,19 +82,6 @@
         "zh-cn": "文档清理。代码无变化。"
       },
       "0.3.0": {
-        "en": "Internal cleanup. No user-facing changes.",
-        "de": "Interne Bereinigung. Keine User-sichtbaren Änderungen.",
-        "ru": "Внутренняя очистка. Без видимых изменений для пользователя.",
-        "pt": "Limpeza interna. Sem alterações visíveis para o usuário.",
-        "nl": "Interne opschoning. Geen wijzigingen voor de gebruiker.",
-        "fr": "Nettoyage interne. Aucune modification visible pour l'utilisateur.",
-        "it": "Pulizia interna. Nessuna modifica visibile all'utente.",
-        "es": "Limpieza interna. Sin cambios visibles para el usuario.",
-        "pl": "Wewnętrzne porządki. Brak zmian widocznych dla użytkownika.",
-        "uk": "Внутрішнє прибирання. Без помітних для користувача змін.",
-        "zh-cn": "内部清理。对用户无可见变化。"
-      },
-      "0.2.18": {
         "en": "Internal cleanup. No user-facing changes.",
         "de": "Interne Bereinigung. Keine User-sichtbaren Änderungen.",
         "ru": "Внутренняя очистка. Без видимых изменений для пользователя.",

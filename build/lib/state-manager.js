@@ -149,6 +149,7 @@ class StateManager {
       const n = parseInt(raw, 10);
       return Number.isFinite(n) ? n : 0;
     }
+    this.adapter.log.debug(`parseStatus drift: ${JSON.stringify(raw)} (type ${typeof raw}) \u2192 0 (delivered fallback)`);
     return 0;
   }
   /**
@@ -170,6 +171,9 @@ class StateManager {
     const rawKey = StateManager.rawIdKey(delivery);
     if (owner !== void 0 && owner !== rawKey) {
       const suffixed = `${id}__${StateManager.shortHash(rawKey)}`;
+      this.adapter.log.debug(
+        `packageId collision: bare='${id}' owner='${owner}' new='${rawKey}' \u2192 suffixed='${suffixed}'`
+      );
       this.idOwner.set(suffixed, rawKey);
       return suffixed;
     }
@@ -234,7 +238,11 @@ class StateManager {
     });
     const statusCode = this.parseStatus(delivery);
     const labels = import_types.STATUS_LABELS[this.language];
-    const statusText = labels[statusCode] || `Unknown (${statusCode})`;
+    let statusText = labels[statusCode];
+    if (!statusText) {
+      this.adapter.log.debug(`status code ${statusCode} not in STATUS_LABELS[${this.language}], using fallback`);
+      statusText = `Unknown (${statusCode})`;
+    }
     await Promise.all([
       this.createAndSet(`${devicePath}.carrier`, asName((0, import_i18n_states.tName)("carrier")), "string", "text", carrierName),
       this.createAndSet(`${devicePath}.status`, asName((0, import_i18n_states.tName)("status")), "string", "text", statusText),
@@ -293,6 +301,9 @@ class StateManager {
    */
   async updateSummary(activeDeliveries) {
     const todayDeliveries = activeDeliveries.filter((d) => this.isToday(d, this.parseStatus(d)));
+    this.adapter.log.debug(
+      `updateSummary: ${activeDeliveries.length} active, ${todayDeliveries.length} expected today`
+    );
     await Promise.all([
       this.createAndSet(
         "summary.activeCount",
@@ -323,6 +334,7 @@ class StateManager {
       endkey: `${this.adapter.namespace}.deliveries.\u9999`
     });
     if (!(objects == null ? void 0 : objects.rows)) {
+      this.adapter.log.debug("cleanupDeliveries: no objects view available, skipping");
       return;
     }
     const toDelete = [];

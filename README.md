@@ -122,6 +122,9 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- Debug log now traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling and lifecycle anchors. Default log unchanged.
+
 ### 0.4.2 (2026-05-10)
 
 - Adapter shuts down cleanly even if parcel.app is slow — pending requests are aborted instead of hanging until kill.

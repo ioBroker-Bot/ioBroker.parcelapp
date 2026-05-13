@@ -71,22 +71,27 @@ class ParcelappAdapter extends utils.Adapter {
   }
   async onReady() {
     var _a, _b;
+    this.log.debug(
+      `onReady: starting (pollInterval=${JSON.stringify(this.config.pollInterval)}, autoRemoveDelivered=${this.config.autoRemoveDelivered})`
+    );
     const sysConfig = await this.getForeignObjectAsync("system.config");
     const language = (_b = (_a = sysConfig == null ? void 0 : sysConfig.common) == null ? void 0 : _a.language) != null ? _b : "";
     if (typeof language === "string" && language.length > 0) {
       this.systemLang = language;
     }
+    this.log.debug(`system language: '${language}' \u2192 using '${this.systemLang}'`);
     await this.setStateAsync("info.connection", { val: false, ack: true });
     const { apiKey } = this.config;
     if (!apiKey || apiKey.trim().length < MIN_API_KEY_LENGTH) {
       this.log.error("No valid API key configured \u2014 please enter your parcel.app API key in the adapter settings");
       return;
     }
-    this.client = new import_parcel_client.ParcelClient(apiKey.trim());
+    this.client = new import_parcel_client.ParcelClient(apiKey.trim(), { debug: (m) => this.log.debug(m) });
     this.stateManager = new import_state_manager.StateManager(this, language);
     await this.cleanupObsoleteStates();
     await this.poll();
     const interval = ParcelappAdapter.coercePollInterval(this.config.pollInterval);
+    this.log.debug(`pollInterval: raw=${JSON.stringify(this.config.pollInterval)} resolved=${interval}min`);
     const intervalMs = interval * 60 * 1e3;
     this.pollTimer = this.setInterval(() => void this.poll(), intervalMs);
     this.log.info(`Parcel tracking started \u2014 polling every ${interval} minutes`);
@@ -117,12 +122,14 @@ class ParcelappAdapter extends utils.Adapter {
       }
       void this.setState("info.connection", { val: false, ack: true }).catch(() => {
       });
-    } catch {
+    } catch (err) {
+      this.log.debug(`onUnload error (ignored): ${(0, import_coerce.errText)(err)}`);
     }
     callback();
   }
   async onMessage(obj) {
     var _a;
+    this.log.debug(`onMessage: command='${obj == null ? void 0 : obj.command}' from='${obj == null ? void 0 : obj.from}' has-callback=${!!(obj == null ? void 0 : obj.callback)}`);
     if (!(obj == null ? void 0 : obj.command) || !obj.callback) {
       return;
     }
@@ -132,16 +139,19 @@ class ParcelappAdapter extends utils.Adapter {
           const msg = obj.message;
           const key = ((_a = msg == null ? void 0 : msg.apiKey) == null ? void 0 : _a.trim()) || "";
           if (!key || key.length < MIN_API_KEY_LENGTH) {
+            this.log.debug("checkConnection: apiKey too short");
             this.sendTo(obj.from, obj.command, { success: false, message: "API key is too short" }, obj.callback);
             return;
           }
-          const testClient = new import_parcel_client.ParcelClient(key);
+          const testClient = new import_parcel_client.ParcelClient(key, { debug: (m) => this.log.debug(m) });
           const result = await testClient.testConnection();
+          this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
           this.sendTo(obj.from, obj.command, result, obj.callback);
           break;
         }
         case "addDelivery": {
           if (!this.client) {
+            this.log.debug("addDelivery: adapter not initialized");
             this.sendTo(
               obj.from,
               obj.command,
@@ -152,6 +162,7 @@ class ParcelappAdapter extends utils.Adapter {
           }
           const request = obj.message;
           const addResult = await this.client.addDelivery(request);
+          this.log.debug(`addDelivery: '${request == null ? void 0 : request.tracking_number}' result=${addResult.success ? "ok" : "fail"}`);
           this.sendTo(obj.from, obj.command, addResult, obj.callback);
           if (addResult.success) {
             void this.poll();
@@ -159,9 +170,11 @@ class ParcelappAdapter extends utils.Adapter {
           break;
         }
         default:
+          this.log.debug(`onMessage: unknown command '${obj.command}'`);
           this.sendTo(obj.from, obj.command, { error: "Unknown command" }, obj.callback);
       }
     } catch (err) {
+      this.log.debug(`onMessage: '${obj.command}' failed: ${(0, import_coerce.errText)(err)}`);
       this.sendTo(obj.from, obj.command, { success: false, error_message: (0, import_coerce.errText)(err) }, obj.callback);
     }
   }
@@ -207,6 +220,8 @@ class ParcelappAdapter extends utils.Adapter {
       return;
     }
     const now = Date.now();
+    const autoRemoveMode = this.config.autoRemoveDelivered !== false;
+    this.log.debug(`poll: starting (autoRemove=${autoRemoveMode}, lastErrorCode='${this.lastErrorCode}')`);
     if (now < this.rateLimitedUntil) {
       const waitMin = Math.ceil((this.rateLimitedUntil - now) / 6e4);
       this.log.debug(`Skipping poll \u2014 rate limited for ${waitMin} more minute(s)`);
@@ -219,8 +234,7 @@ class ParcelappAdapter extends utils.Adapter {
     this.isPolling = true;
     this.lastPollTime = now;
     try {
-      const autoRemove = this.config.autoRemoveDelivered !== false;
-      const deliveries = await this.client.getDeliveries(autoRemove ? "active" : "recent");
+      const deliveries = await this.client.getDeliveries(autoRemoveMode ? "active" : "recent");
       this.rateLimitedUntil = 0;
       if (this.lastErrorCode) {
         this.log.info("Connection restored");
@@ -228,11 +242,14 @@ class ParcelappAdapter extends utils.Adapter {
       }
       await this.setStateAsync("info.connection", { val: true, ack: true });
       const activeDeliveries = deliveries.filter((d) => this.stateManager.parseStatus(d) !== 0);
-      const visibleDeliveries = autoRemove ? activeDeliveries : deliveries;
+      const visibleDeliveries = autoRemoveMode ? activeDeliveries : deliveries;
       this.stateManager.resetPollState();
       const idResults = await Promise.all(
         visibleDeliveries.map(async (delivery) => {
           try {
+            this.log.debug(
+              `updateDelivery: '${delivery.tracking_number}' carrier=${delivery.carrier_code} status=${delivery.status_code}`
+            );
             const carrierName = await this.client.getCarrierName(delivery.carrier_code);
             await this.stateManager.updateDelivery(delivery, carrierName);
             this.failedDeliveries.delete(delivery.tracking_number);

@@ -61,6 +61,12 @@ class ParcelappAdapter extends utils.Adapter {
   }
 
   private async onReady(): Promise<void> {
+    // v0.4.3 (G1): trace start of onReady so the debug log shows when the
+    // adapter starts wiring up, what the config inputs look like.
+    this.log.debug(
+      `onReady: starting (pollInterval=${JSON.stringify(this.config.pollInterval)}, autoRemoveDelivered=${this.config.autoRemoveDelivered})`,
+    );
+
     // Pick the system language up-front so all user-facing logs go out in the
     // user's language. StateManager also gets it for state-name localization.
     const sysConfig = await this.getForeignObjectAsync("system.config");
@@ -68,6 +74,9 @@ class ParcelappAdapter extends utils.Adapter {
     if (typeof language === "string" && language.length > 0) {
       this.systemLang = language;
     }
+    // v0.4.3 (G2): trace the resolved system language. Empty/unknown values
+    // fall back to "en" silently in older versions — now visible.
+    this.log.debug(`system language: '${language}' → using '${this.systemLang}'`);
 
     await this.setStateAsync("info.connection", { val: false, ack: true });
 
@@ -78,8 +87,9 @@ class ParcelappAdapter extends utils.Adapter {
       return;
     }
 
-    // Initialize
-    this.client = new ParcelClient(apiKey.trim());
+    // Initialize. v0.4.3: pass a debug-logger so the HTTPS layer can trace
+    // request/response lifecycle. `loglevel=info` users see nothing changed.
+    this.client = new ParcelClient(apiKey.trim(), { debug: (m: string) => this.log.debug(m) });
     this.stateManager = new StateManager(this, language);
 
     // Cleanup obsolete states
@@ -93,6 +103,11 @@ class ParcelappAdapter extends utils.Adapter {
     // undefined)` returns NaN, and `setInterval(fn, NaN)` becomes
     // `setInterval(fn, 0)` — a tight loop that hammers the API.
     const interval = ParcelappAdapter.coercePollInterval(this.config.pollInterval);
+    // v0.4.3 (G3): always-log the resolved interval. Detecting "drift" from
+    // the raw value is fragile (`"10"` → `10` is not drift, just coercion);
+    // an always-on log line keeps the resolution visible without false-flag
+    // logic. See `Ressourcen/parcelapp/v0.4.3-debug-audit.md` advisor pt 3.
+    this.log.debug(`pollInterval: raw=${JSON.stringify(this.config.pollInterval)} resolved=${interval}min`);
     const intervalMs = interval * 60 * 1000;
     this.pollTimer = this.setInterval(() => void this.poll(), intervalMs);
 
@@ -131,13 +146,19 @@ class ParcelappAdapter extends utils.Adapter {
       void this.setState("info.connection", { val: false, ack: true }).catch(() => {
         /* broker is shutting down — ignore */
       });
-    } catch {
-      // ignore
+    } catch (err) {
+      // v0.4.3 (G4): replace silent `// ignore` with a trace so shutdown
+      // errors leave a debug breadcrumb. Broker-already-down errors here
+      // are expected — debug-level keeps them out of the user log.
+      this.log.debug(`onUnload error (ignored): ${errText(err)}`);
     }
     callback();
   }
 
   private async onMessage(obj: ioBroker.Message): Promise<void> {
+    // v0.4.3 (F1): entry log BEFORE the early-return — broadcast messages
+    // without callback wouldn't be visible otherwise.
+    this.log.debug(`onMessage: command='${obj?.command}' from='${obj?.from}' has-callback=${!!obj?.callback}`);
     if (!obj?.command || !obj.callback) {
       return;
     }
@@ -148,16 +169,24 @@ class ParcelappAdapter extends utils.Adapter {
           const msg = obj.message as { apiKey?: string };
           const key = msg?.apiKey?.trim() || "";
           if (!key || key.length < MIN_API_KEY_LENGTH) {
+            // v0.4.3 (F2): trace the reject before sendTo.
+            this.log.debug("checkConnection: apiKey too short");
             this.sendTo(obj.from, obj.command, { success: false, message: "API key is too short" }, obj.callback);
             return;
           }
-          const testClient = new ParcelClient(key);
+          // v0.4.3: same debug-logger as the prod client so checkConnection
+          // failures get the same HTTPS-layer trace.
+          const testClient = new ParcelClient(key, { debug: (m: string) => this.log.debug(m) });
           const result = await testClient.testConnection();
+          // v0.4.3 (F3): trace checkConnection result.
+          this.log.debug(`checkConnection: result=${result.success ? "ok" : "fail"} (${result.message})`);
           this.sendTo(obj.from, obj.command, result, obj.callback);
           break;
         }
         case "addDelivery": {
           if (!this.client) {
+            // v0.4.3 (F4): trace addDelivery-before-init.
+            this.log.debug("addDelivery: adapter not initialized");
             this.sendTo(
               obj.from,
               obj.command,
@@ -172,6 +201,8 @@ class ParcelappAdapter extends utils.Adapter {
             description: string;
           };
           const addResult = await this.client.addDelivery(request);
+          // v0.4.3 (F5): trace addDelivery result with the tracking number.
+          this.log.debug(`addDelivery: '${request?.tracking_number}' result=${addResult.success ? "ok" : "fail"}`);
           this.sendTo(obj.from, obj.command, addResult, obj.callback);
           if (addResult.success) {
             void this.poll();
@@ -179,9 +210,14 @@ class ParcelappAdapter extends utils.Adapter {
           break;
         }
         default:
+          // v0.4.3 (F6): trace unknown command before sendTo.
+          this.log.debug(`onMessage: unknown command '${obj.command}'`);
           this.sendTo(obj.from, obj.command, { error: "Unknown command" }, obj.callback);
       }
     } catch (err) {
+      // v0.4.3 (F7): trace catch so the debug log shows what failed.
+      // The sendTo back to the caller is preserved unchanged.
+      this.log.debug(`onMessage: '${obj.command}' failed: ${errText(err)}`);
       this.sendTo(obj.from, obj.command, { success: false, error_message: errText(err) }, obj.callback);
     }
   }
@@ -238,6 +274,11 @@ class ParcelappAdapter extends utils.Adapter {
     }
 
     const now = Date.now();
+    // v0.4.3 (B1): poll-entry anchor — visible after the re-entry guard but
+    // before the rate-limit/throttle skips. Shows mode + current error state
+    // so the debug log gives context for whatever follows.
+    const autoRemoveMode = this.config.autoRemoveDelivered !== false;
+    this.log.debug(`poll: starting (autoRemove=${autoRemoveMode}, lastErrorCode='${this.lastErrorCode}')`);
 
     // Skip if rate limited
     if (now < this.rateLimitedUntil) {
@@ -256,8 +297,7 @@ class ParcelappAdapter extends utils.Adapter {
     this.lastPollTime = now;
     try {
       // When keeping delivered packages, use "recent" to get them from API
-      const autoRemove = this.config.autoRemoveDelivered !== false;
-      const deliveries = await this.client.getDeliveries(autoRemove ? "active" : "recent");
+      const deliveries = await this.client.getDeliveries(autoRemoveMode ? "active" : "recent");
 
       // Reset error state on success
       this.rateLimitedUntil = 0;
@@ -269,7 +309,7 @@ class ParcelappAdapter extends utils.Adapter {
 
       // Split into active (non-delivered) and visible (what gets states)
       const activeDeliveries = deliveries.filter(d => this.stateManager!.parseStatus(d) !== 0);
-      const visibleDeliveries = autoRemove ? activeDeliveries : deliveries;
+      const visibleDeliveries = autoRemoveMode ? activeDeliveries : deliveries;
 
       // v0.4.2 (S3): reset per-poll collision tracker so the bare-id wins
       // for the first occurrence in this poll (deterministic, back-compat).
@@ -280,6 +320,12 @@ class ParcelappAdapter extends utils.Adapter {
       const idResults = await Promise.all(
         visibleDeliveries.map(async delivery => {
           try {
+            // v0.4.3 (C1): per-delivery entry. ~10 packages × 144 polls/day
+            // = ~1440 debug lines/day — acceptable at debug-level. Line stays
+            // short (tracking + carrier + status only, no full delivery JSON).
+            this.log.debug(
+              `updateDelivery: '${delivery.tracking_number}' carrier=${delivery.carrier_code} status=${delivery.status_code}`,
+            );
             const carrierName = await this.client!.getCarrierName(delivery.carrier_code);
             await this.stateManager!.updateDelivery(delivery, carrierName);
             this.failedDeliveries.delete(delivery.tracking_number);

@@ -46,14 +46,22 @@ class ParcelClient {
    * 4-second kill deadline.
    */
   inflight = /* @__PURE__ */ new Set();
-  /** @param apiKey The parcel.app API key */
-  constructor(apiKey) {
+  /** v0.4.3: optional logger for the HTTPS-layer trace. See {@link ParcelClientLogger}. */
+  log;
+  /**
+   * @param apiKey The parcel.app API key
+   * @param log Optional adapter logger for HTTPS-layer trace (v0.4.3)
+   */
+  constructor(apiKey, log) {
     this.apiKey = apiKey;
+    this.log = log;
   }
   /**
    * v0.4.2 (P1): abort every in-flight HTTPS request. Idempotent.
    */
   cancelAll() {
+    var _a;
+    (_a = this.log) == null ? void 0 : _a.debug(`cancelAll: aborting ${this.inflight.size} inflight requests`);
     for (const ctrl of this.inflight) {
       ctrl.abort();
     }
@@ -64,8 +72,10 @@ class ParcelClient {
    * @param filterMode Filter active or recent deliveries
    */
   async getDeliveries(filterMode = "active") {
+    var _a, _b;
     const response = await this.request("GET", `/deliveries/?filter_mode=${filterMode}`, true);
     if (!response || typeof response !== "object") {
+      (_a = this.log) == null ? void 0 : _a.debug(`API drift: malformed response (got ${typeof response})`);
       const err = new Error("API error: malformed response");
       err.code = "API_ERROR";
       throw err;
@@ -74,6 +84,7 @@ class ParcelClient {
       const rawCode = typeof response.error_code === "string" ? response.error_code : "";
       const rawMsg = typeof response.error_message === "string" ? response.error_message : "";
       const code = rawCode || rawMsg || "UNKNOWN";
+      (_b = this.log) == null ? void 0 : _b.debug(`API drift: success=false, code='${code}', msg='${rawMsg}'`);
       const err = new Error(`API error: ${rawMsg || code}`);
       err.code = rawCode === "INVALID_API_KEY" ? "INVALID_API_KEY" : "API_ERROR";
       throw err;
@@ -90,6 +101,7 @@ class ParcelClient {
   }
   /** Get carrier names (cached after first call) */
   async getCarrierNames() {
+    var _a, _b, _c;
     if (this.carrierCache) {
       return this.carrierCache;
     }
@@ -97,10 +109,16 @@ class ParcelClient {
       const raw = await this.request("GET", "/supported_carriers.json", false);
       if (raw && typeof raw === "object" && !Array.isArray(raw)) {
         this.carrierCache = raw;
+        (_a = this.log) == null ? void 0 : _a.debug(`carriers: fetched ${Object.keys(this.carrierCache).length} entries`);
       } else {
+        (_b = this.log) == null ? void 0 : _b.debug(
+          `carriers: drift (got ${Array.isArray(raw) ? "array" : typeof raw}, expected object), kept empty`
+        );
         return {};
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (_c = this.log) == null ? void 0 : _c.debug(`carriers: fetch failed (kept empty, will retry): ${msg}`);
       return {};
     }
     return this.carrierCache;
@@ -111,7 +129,9 @@ class ParcelClient {
    * @param carrierCode The carrier code from API
    */
   async getCarrierName(carrierCode) {
+    var _a;
     if (typeof carrierCode !== "string" || carrierCode.length === 0) {
+      (_a = this.log) == null ? void 0 : _a.debug(`getCarrierName: non-string code (got ${typeof carrierCode}), returning UNKNOWN`);
       return "UNKNOWN";
     }
     const carriers = await this.getCarrierNames();
@@ -140,11 +160,16 @@ class ParcelClient {
    * @param body Optional request body
    */
   request(method, path, authenticated, body) {
+    var _a;
+    const startedAt = Date.now();
+    (_a = this.log) == null ? void 0 : _a.debug(`HTTP ${method} ${path}`);
     return new Promise((resolve, reject) => {
+      var _a2;
       let url;
       try {
         url = new URL(`${API_BASE}${path}`);
       } catch {
+        (_a2 = this.log) == null ? void 0 : _a2.debug(`HTTP invalid URL: ${API_BASE}${path}`);
         const err = new Error(`Invalid URL: ${API_BASE}${path}`);
         err.code = "INVALID_URL";
         reject(err);
@@ -179,18 +204,21 @@ class ParcelClient {
           reject(err);
         });
         res.on("data", (chunk) => {
+          var _a3;
           if (oversized) {
             return;
           }
           bodyBytes += chunk.length;
           if (bodyBytes > MAX_BODY_BYTES) {
             oversized = true;
+            (_a3 = this.log) == null ? void 0 : _a3.debug(`HTTP body oversized ${path}: dropping at ${bodyBytes}B`);
             req.destroy(new Error(`Response body exceeds ${MAX_BODY_BYTES} bytes`));
             return;
           }
           chunks.push(chunk);
         });
         res.on("end", () => {
+          var _a3, _b, _c, _d;
           cleanup();
           if (oversized) {
             const err = new Error("Response body too large");
@@ -205,6 +233,7 @@ class ParcelClient {
               const err2 = new Error("Rate limit exceeded");
               err2.code = "RATE_LIMITED";
               err2.retryAfterSeconds = Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(24 * 3600, retryAfter) : 5 * 60;
+              (_a3 = this.log) == null ? void 0 : _a3.debug(`HTTP 429 ${path} \u2192 retry-after=${err2.retryAfterSeconds}s`);
               reject(err2);
               return;
             }
@@ -216,12 +245,16 @@ class ParcelClient {
             } else {
               err.code = "HTTP_ERROR";
             }
+            (_b = this.log) == null ? void 0 : _b.debug(`HTTP ${method} ${path} \u2192 ${res.statusCode} ${err.code} (body=${raw.substring(0, 200)})`);
             reject(err);
             return;
           }
           try {
-            resolve(JSON.parse(raw));
+            const parsed = JSON.parse(raw);
+            (_c = this.log) == null ? void 0 : _c.debug(`HTTP ${method} ${path} \u2192 ${res.statusCode} (${Date.now() - startedAt}ms, ${bodyBytes}B)`);
+            resolve(parsed);
           } catch {
+            (_d = this.log) == null ? void 0 : _d.debug(`HTTP JSON parse fail ${path}: ${raw.substring(0, 200)}`);
             reject(new Error(`JSON parse error: ${raw.substring(0, 200)}`));
           }
         });
@@ -230,12 +263,16 @@ class ParcelClient {
         req.destroy(new Error("Request aborted"));
       });
       req.on("timeout", () => {
+        var _a3;
         req.destroy();
         cleanup();
+        (_a3 = this.log) == null ? void 0 : _a3.debug(`HTTP timeout ${method} ${path} (${Date.now() - startedAt}ms)`);
         reject(new Error("Request timeout"));
       });
       req.on("error", (err) => {
+        var _a3;
         cleanup();
+        (_a3 = this.log) == null ? void 0 : _a3.debug(`HTTP error ${method} ${path} (${Date.now() - startedAt}ms): ${err.message}`);
         reject(err);
       });
       if (body) {
