@@ -122,7 +122,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.4.4 (2026-05-13)
 - Adapter shuts down cleanly even if the "Test Connection" button was still running — the test request is now aborted at unload along with regular polling.
 
 ### 0.4.3 (2026-05-13)
@@ -143,9 +143,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 
 - State names now follow your ioBroker system language (11 languages).
 - Minimum requirements: Node.js 22 and ioBroker Admin 7.8.23.
-
-### 0.3.2 (2026-05-01)
-- Documentation polish across all languages.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
