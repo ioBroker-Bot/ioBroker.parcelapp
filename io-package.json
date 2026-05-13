@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "news": {
-      "NEXT": {
+      "0.4.3": {
         "en": "Debug log traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling. Default log unchanged.",
         "de": "Debug-Log dokumentiert stille Pfade: HTTPS-Request-Lifecycle, Carrier-Liste, Per-Paket-Updates und Admin-Message-Handling. Default-Log unverändert.",
         "ru": "Журнал отладки прослеживает тихие пути: цикл HTTPS-запроса, получение списка перевозчиков, обновления посылок и обработка сообщений. Стандартный лог не изменился.",

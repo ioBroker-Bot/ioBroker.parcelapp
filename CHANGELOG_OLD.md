@@ -1,4 +1,7 @@
 # Older Changes
+## 0.3.1 (2026-05-01)
+- Documentation cleanup. No code changes.
+
 ## 0.3.0 (2026-04-30)
 - Internal cleanup. No user-facing changes.
 

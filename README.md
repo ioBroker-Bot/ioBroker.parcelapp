@@ -122,7 +122,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.4.3 (2026-05-13)
 - Debug log now traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling and lifecycle anchors. Default log unchanged.
 
 ### 0.4.2 (2026-05-10)
@@ -143,9 +143,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 
 ### 0.3.2 (2026-05-01)
 - Documentation: rewrote release notes for v0.2.14–v0.3.1 in user-friendly style across all languages.
-
-### 0.3.1 (2026-05-01)
-- Documentation cleanup. No code changes.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
