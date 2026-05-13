@@ -9,7 +9,7 @@
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff5e5b?logo=ko-fi)](https://ko-fi.com/krobipd)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/krobipd)
 
-<img src="https://raw.githubusercontent.com/krobipd/ioBroker.parcelapp/main/admin/parcelapp.svg" width="100" />
+<img src="https://cdn.jsdelivr.net/gh/krobipd/ioBroker.parcelapp@main/admin/parcelapp.svg" width="100" />
 
 ioBroker adapter for the [parcel.app](https://parcelapp.net) API. Supports all carriers that parcel.app tracks.
 
@@ -142,7 +142,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 - Minimum requirements: Node.js 22 and ioBroker Admin 7.8.23.
 
 ### 0.3.2 (2026-05-01)
-- Documentation: rewrote release notes for v0.2.14–v0.3.1 in user-friendly style across all languages.
+- Documentation polish across all languages.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

@@ -1,6 +1,6 @@
 # Older Changes
 ## 0.3.1 (2026-05-01)
-- Documentation cleanup. No code changes.
+- Documentation polish.
 
 ## 0.3.0 (2026-04-30)
 - Internal cleanup. No user-facing changes.
@@ -15,67 +15,67 @@
 - Min `js-controller` restored to `>=6.0.11` (was incorrectly bumped to `>=7.0.23` in 0.2.15).
 
 ## 0.2.15 (2026-04-26)
-- Crash defense: process-level `unhandledRejection`/`uncaughtException` handlers.
+- Crash defense: process-level error handlers catch unexpected errors and restart cleanly.
 
 ## 0.2.14 (2026-04-23)
-- Status labels localized via `system.config.language` (11 languages). Fix: `summary.todayCount` for non-DE/EN.
+- Status labels are now localized in 11 languages following the ioBroker system language. Fix: today-count works across all languages.
 
 ## 0.2.13 (2026-04-19)
-- Internal: `common.messagebox=true` (admin-UI button routing).
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.12 (2026-04-18)
-- API-drift hardening in `ParcelClient` and `StateManager`. +38 regression tests.
+- API-drift hardening: malformed responses no longer crash the adapter.
 
 ## 0.2.11 (2026-04-12)
-- Fix: response-stream errors handled, per-delivery poll failures isolated, safer `onMessage`/`onUnload`.
+- Fix: response-stream errors handled, per-delivery poll failures isolated, safer message and unload handling.
 
 ## 0.2.10 (2026-04-12)
-- Internal cleanup.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.9 (2026-04-08)
-- Standard ioBroker test suite added.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.8 (2026-04-05)
-- Empty parent folders cleaned after obsolete-state removal.
+- Empty parent folders are now cleaned after obsolete-state removal.
 
 ## 0.2.7 (2026-04-05)
-- Internal: consistent UI labels.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.6 (2026-04-05)
-- Internal cleanup.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.5 (2026-04-04)
 - Fix: delivery-window timeout on Windows.
 
 ## 0.2.4 (2026-04-03)
-- Internal dev-tooling modernization.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.3 (2026-03-28)
 - Fix: carrier-name cache retries after initial error.
 
 ## 0.2.2 (2026-03-28)
-- Adapter-managed timers; Windows + macOS in CI.
+- Internal cleanup. No user-facing changes.
 
 ## 0.2.1 (2026-03-25)
-- API rate-limit detection (HTTP 429) with cooldown. Connection-error deduplication. Poll throttling (60 s minimum).
+- API rate-limit detection (HTTP 429) with cooldown. Connection-error deduplication. Poll throttling.
 
 ## 0.2.0 (2026-03-25)
-- Optional keep-delivered packages. Admin UI simplified to single page.
+- Optional keep-delivered packages. Admin UI simplified to a single page.
 
 ## 0.1.5 (2026-03-24)
-- Internal: dependabot schedule + actions update.
+- Internal cleanup. No user-facing changes.
 
 ## 0.1.4 (2026-03-24)
 - README clarified.
 
 ## 0.1.3 (2026-03-24)
-- Auto-merge workflow for Dependabot PRs.
+- Internal cleanup. No user-facing changes.
 
 ## 0.1.2 (2026-03-23)
-- devDependencies update.
+- Internal cleanup. No user-facing changes.
 
 ## 0.1.1 (2026-03-23)
-- Adapter logo redesigned. Repochecker fixes.
+- Adapter logo redesigned.
 
 ## 0.1.0 (2026-03-23)
 - Initial release. Package tracking via parcel.app API.
