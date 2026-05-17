@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.4.5",
+    "version": "0.4.6",
     "news": {
-      "NEXT": {
+      "0.4.6": {
         "en": "Localized adapter info and connection status labels into 11 languages.",
         "de": "Adapter-Info und Verbindungsstatus-Labels in 11 Sprachen lokalisiert.",
         "ru": "Локализованы метки информации адаптера и статуса подключения на 11 языков.",

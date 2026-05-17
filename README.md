@@ -122,7 +122,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.4.6 (2026-05-17)
 
 - Localized "Adapter Information" and "Connection status" labels into 11 languages — previously English only.
 
@@ -141,10 +141,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 - "Forbidden" responses (e.g. when the Premium subscription is no longer active) now log a clear hint pointing to your parcel.app account, instead of looping reauth as if the API key were just wrong.
 - Two parcels whose tracking numbers differ only in special characters no longer overwrite each other in the state tree — the second one gets a hash suffix.
 - Defensive: bogus poll-interval values can no longer turn into a tight loop hammering the API; rate-limit cooldowns can no longer get stuck near zero.
-
-### 0.4.1 (2026-05-09)
-
-- Adapter log messages are now English only, in line with the ioBroker community standard. Localized state names (11 languages) are unchanged.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
