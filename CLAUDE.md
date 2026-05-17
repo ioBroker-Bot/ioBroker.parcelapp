@@ -6,7 +6,7 @@
 
 **ioBroker Parcel Tracking Adapter** — Paketverfolgung über [parcel.app](https://parcelapp.net) API. Alle Carrier die parcel.app unterstützt, ein API-Key (Premium).
 
-- **Version:** 0.4.6 (released 2026-05-17) — `scripts/sync-iopackage-from-i18n.py` (hassemu/beszel-Linie). `info` + `info.connection` instanceObjects jetzt mit 11-Sprachen-Translations (vorher nur English). Vorgänger v0.4.5 (2026-05-17) Toolchain-Parity: TS ~6.0.3, vitest, eslint-config 2.3.4, release-script 5.2.0. Code-Cleanup: `asName()` entfernt (14 callsites), `ESTIMATE_LABELS`→i18n-states.ts, `getLatestEvent()` DRY-Helper. extIcon CSP-Fix. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
+- **Version:** 0.4.7 (released 2026-05-18) — Internal cleanup: dead tsconfig settings entfernt (noEmitOnError, outDir, removeComments, sourceMap, inlineSourceMap, duplicate types array — alle no-ops bei noEmit:true). Vorgänger **0.4.6** (released 2026-05-17) — `scripts/sync-iopackage-from-i18n.py` (hassemu/beszel-Linie). `info` + `info.connection` instanceObjects jetzt mit 11-Sprachen-Translations (vorher nur English). Vorgänger v0.4.5 (2026-05-17) Toolchain-Parity: TS ~6.0.3, vitest, eslint-config 2.3.4, release-script 5.2.0. Code-Cleanup: `asName()` entfernt (14 callsites), `ESTIMATE_LABELS`→i18n-states.ts, `getLatestEvent()` DRY-Helper. extIcon CSP-Fix. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
 - **GitHub:** https://github.com/krobipd/ioBroker.parcelapp
 - **npm:** https://www.npmjs.com/package/iobroker.parcelapp
 - **Repository PR:** ioBroker/ioBroker.repositories#5667 (MERGED 2026-05-10, im Latest-Repo)
