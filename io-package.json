@@ -3,6 +3,19 @@
     "name": "parcelapp",
     "version": "0.4.6",
     "news": {
+      "NEXT": {
+        "en": "Internal cleanup. No user-facing changes.",
+        "de": "Interne Bereinigung. Keine sichtbaren Änderungen.",
+        "ru": "Внутренняя очистка. Нет видимых изменений для пользователей.",
+        "pt": "Limpeza interna. Sem alterações visíveis para o utilizador.",
+        "nl": "Interne opruiming. Geen zichtbare wijzigingen voor gebruikers.",
+        "fr": "Nettoyage interne. Aucun changement visible pour l'utilisateur.",
+        "it": "Pulizia interna. Nessuna modifica visibile per l'utente.",
+        "es": "Limpieza interna. Sin cambios visibles para el usuario.",
+        "pl": "Wewnętrzne porządki. Brak widocznych zmian dla użytkownika.",
+        "uk": "Внутрішнє прибирання. Без видимих змін для користувача.",
+        "zh-cn": "内部清理。无用户可见的更改。"
+      },
       "0.4.6": {
         "en": "Localized adapter info and connection status labels into 11 languages.",
         "de": "Adapter-Info und Verbindungsstatus-Labels in 11 Sprachen lokalisiert.",
@@ -80,19 +93,6 @@
         "pl": "Komunikaty dziennika adaptera są teraz wyłącznie po angielsku, zgodnie ze standardem społeczności ioBroker. Zlokalizowane nazwy stanów (11 języków) pozostają bez zmian.",
         "uk": "Повідомлення журналу адаптера тепер лише англійською, відповідно до стандарту спільноти ioBroker. Локалізовані назви станів (11 мов) залишаються без змін.",
         "zh-cn": "适配器日志消息现在仅为英文，符合 ioBroker 社区标准。本地化的数据点名称（11 种语言）保持不变。"
-      },
-      "0.4.0": {
-        "en": "State names now follow your ioBroker system language across 11 languages. User-visible info/warn/error logs are localized too. Min Node 22, Admin 7.8.23.",
-        "de": "Datenpunkt-Namen folgen jetzt der ioBroker-Systemsprache in 11 Sprachen. User-sichtbare info/warn/error-Logs ebenfalls lokalisiert. Min Node 22, Admin 7.8.23.",
-        "ru": "Имена датчиков теперь следуют системному языку ioBroker на 11 языках. Пользовательские info/warn/error логи также локализованы. Мин. Node 22, Admin 7.8.23.",
-        "pt": "Nomes dos datapoints seguem agora o idioma do sistema ioBroker em 11 idiomas. Logs info/warn/error visíveis ao utilizador também localizados. Mín. Node 22, Admin 7.8.23.",
-        "nl": "Datapointnamen volgen nu je ioBroker-systeemtaal in 11 talen. Voor de gebruiker zichtbare info/warn/error-logs ook gelokaliseerd. Min. Node 22, Admin 7.8.23.",
-        "fr": "Les noms des datapoints suivent désormais la langue système ioBroker en 11 langues. Logs info/warn/error visibles localisés. Min Node 22, Admin 7.8.23.",
-        "it": "I nomi dei datapoint seguono ora la lingua di sistema ioBroker in 11 lingue. Log info/warn/error visibili agli utenti localizzati. Min Node 22, Admin 7.8.23.",
-        "es": "Los nombres de datapoints siguen ahora el idioma del sistema ioBroker en 11 idiomas. Logs info/warn/error visibles al usuario localizados. Mín. Node 22, Admin 7.8.23.",
-        "pl": "Nazwy datapointów podążają teraz za językiem systemu ioBroker w 11 językach. Widoczne dla użytkownika logi info/warn/error również zlokalizowane. Min Node 22, Admin 7.8.23.",
-        "uk": "Імена датапоінтів тепер слідують системній мові ioBroker 11 мовами. Користувачу видимі info/warn/error логи також локалізовані. Мін. Node 22, Admin 7.8.23.",
-        "zh-cn": "数据点名称现在遵循 ioBroker 系统语言（11 种语言）。用户可见的 info/warn/error 日志也已本地化。最低 Node 22、Admin 7.8.23。"
       }
     },
     "titleLang": {
