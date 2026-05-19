@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.4.7",
+    "version": "0.4.8",
     "news": {
-      "NEXT": {
+      "0.4.8": {
         "en": "Code quality enforced with standard formatting.",
         "de": "Codequalität mit standardisierter Formatierung durchgesetzt.",
         "ru": "Обеспечено качество кода со стандартным форматированием.",
