@@ -39,23 +39,10 @@ class ParcelappAdapter extends utils.Adapter {
       ...options,
       name: "parcelapp",
     });
-    // Wrap async handlers with .catch() so a rejection can never become an
-    // unhandled promise rejection (which would SIGKILL the adapter and trap
-    // js-controller in a restart loop without any stack trace).
-    this.on("ready", () => {
-      this.onReady().catch(err => this.log.error(`onReady failed: ${errText(err)}`));
-    });
+    this.on("ready", this.onReady.bind(this));
     this.on("unload", this.onUnload.bind(this));
-    this.on("message", obj => {
-      this.onMessage(obj).catch(err => this.log.error(`onMessage failed: ${errText(err)}`));
-    });
-    // Last-line-of-defence against unhandled rejections / sync throws from
-    // fire-and-forget paths (e.g. `void this.poll()`). The per-handler
-    // .catch() wrappers cover the documented async paths; this catches
-    // anything that slips past during refactors.
-    // v0.4.2 (M1): log + terminate(11) instead of leaving the process alive
-    // in an undefined state. The per-handler wrappers cover expected paths;
-    // anything reaching here is by definition unexpected.
+    this.on("message", this.onMessage.bind(this));
+    // Safety net for fire-and-forget paths (e.g. `void this.poll()`).
     this.unhandledRejectionHandler = (reason: unknown) => {
       this.log.error(`Unhandled rejection: ${errText(reason)}`);
       this.terminate?.(11);
@@ -69,57 +56,42 @@ class ParcelappAdapter extends utils.Adapter {
   }
 
   private async onReady(): Promise<void> {
-    // v0.4.3 (G1): trace start of onReady so the debug log shows when the
-    // adapter starts wiring up, what the config inputs look like.
-    this.log.debug(
-      `onReady: starting (pollInterval=${JSON.stringify(this.config.pollInterval)}, autoRemoveDelivered=${this.config.autoRemoveDelivered})`,
-    );
+    try {
+      this.log.debug(
+        `onReady: starting (pollInterval=${JSON.stringify(this.config.pollInterval)}, autoRemoveDelivered=${this.config.autoRemoveDelivered})`,
+      );
 
-    // Pick the system language up-front so all user-facing logs go out in the
-    // user's language. StateManager also gets it for state-name localization.
-    const sysConfig = await this.getForeignObjectAsync("system.config");
-    const language = (sysConfig?.common as { language?: string } | undefined)?.language ?? "";
-    if (typeof language === "string" && language.length > 0) {
-      this.systemLang = language;
+      const sysConfig = await this.getForeignObjectAsync("system.config");
+      const language = (sysConfig?.common as { language?: string } | undefined)?.language ?? "";
+      if (typeof language === "string" && language.length > 0) {
+        this.systemLang = language;
+      }
+      this.log.debug(`system language: '${language}' → using '${this.systemLang}'`);
+
+      await this.setStateAsync("info.connection", { val: false, ack: true });
+
+      const { apiKey } = this.config;
+      if (!apiKey || apiKey.trim().length < MIN_API_KEY_LENGTH) {
+        this.log.error("No valid API key configured — please enter your parcel.app API key in the adapter settings");
+        return;
+      }
+
+      this.client = new ParcelClient(apiKey.trim(), { debug: (m: string) => this.log.debug(m) });
+      this.stateManager = new StateManager(this, language);
+
+      await this.cleanupObsoleteStates();
+
+      await this.poll();
+
+      const interval = ParcelappAdapter.coercePollInterval(this.config.pollInterval);
+      this.log.debug(`pollInterval: raw=${JSON.stringify(this.config.pollInterval)} resolved=${interval}min`);
+      const intervalMs = interval * 60 * 1000;
+      this.pollTimer = this.setInterval(() => void this.poll(), intervalMs);
+
+      this.log.info(`Parcel tracking started — polling every ${interval} minutes`);
+    } catch (err: unknown) {
+      this.log.error(`onReady failed: ${errText(err)}`);
     }
-    // v0.4.3 (G2): trace the resolved system language. Empty/unknown values
-    // fall back to "en" silently in older versions — now visible.
-    this.log.debug(`system language: '${language}' → using '${this.systemLang}'`);
-
-    await this.setStateAsync("info.connection", { val: false, ack: true });
-
-    // Validate config
-    const { apiKey } = this.config;
-    if (!apiKey || apiKey.trim().length < MIN_API_KEY_LENGTH) {
-      this.log.error("No valid API key configured — please enter your parcel.app API key in the adapter settings");
-      return;
-    }
-
-    // Initialize. v0.4.3: pass a debug-logger so the HTTPS layer can trace
-    // request/response lifecycle. `loglevel=info` users see nothing changed.
-    this.client = new ParcelClient(apiKey.trim(), { debug: (m: string) => this.log.debug(m) });
-    this.stateManager = new StateManager(this, language);
-
-    // Cleanup obsolete states
-    await this.cleanupObsoleteStates();
-
-    // Initial poll
-    await this.poll();
-
-    // v0.4.2 (M5): coerce explicitly. Admin can store `pollInterval` as a
-    // string; `Math.min(60, "10")` happens to coerce, but `Math.max(5,
-    // undefined)` returns NaN, and `setInterval(fn, NaN)` becomes
-    // `setInterval(fn, 0)` — a tight loop that hammers the API.
-    const interval = ParcelappAdapter.coercePollInterval(this.config.pollInterval);
-    // v0.4.3 (G3): always-log the resolved interval. Detecting "drift" from
-    // the raw value is fragile (`"10"` → `10` is not drift, just coercion);
-    // an always-on log line keeps the resolution visible without false-flag
-    // logic. See `Ressourcen/parcelapp/v0.4.3-debug-audit.md` advisor pt 3.
-    this.log.debug(`pollInterval: raw=${JSON.stringify(this.config.pollInterval)} resolved=${interval}min`);
-    const intervalMs = interval * 60 * 1000;
-    this.pollTimer = this.setInterval(() => void this.poll(), intervalMs);
-
-    this.log.info(`Parcel tracking started — polling every ${interval} minutes`);
   }
 
   /**

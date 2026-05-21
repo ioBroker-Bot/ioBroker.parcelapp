@@ -6,7 +6,7 @@
 
 **ioBroker Parcel Tracking Adapter** — Paketverfolgung über [parcel.app](https://parcelapp.net) API. Alle Carrier die parcel.app unterstützt, ein API-Key (Premium).
 
-- **Version:** 0.4.8 (released 2026-05-19) — NUT-Konsistenz: prettier auf ioBroker-Standard, dependabot double-quotes + TS-6-Kommentar, CI `fail_level: error`, `.releaseconfig.json` 2-Space, vitest `singleFork: false`, README Claude-footer-Fix. Konsistenz-Audit: all clean. Vorgänger **0.4.7** (released 2026-05-18) — Internal cleanup: dead tsconfig settings entfernt. Vorgänger **0.4.6** (released 2026-05-17) — `scripts/sync-iopackage-from-i18n.py`, instanceObjects mit 11-Sprachen-Translations. v0.4.5 Toolchain-Parity: TS ~6.0.3, vitest, eslint-config 2.3.4. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
+- **Version:** 0.4.9 (Community-standard handler pattern). Vorgänger **0.4.8** (released 2026-05-19) — NUT-Konsistenz. v0.4.7 Internal cleanup. v0.4.6 instanceObjects i18n. v0.4.5 Toolchain-Parity. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
 - **GitHub:** https://github.com/krobipd/ioBroker.parcelapp
 - **npm:** https://www.npmjs.com/package/iobroker.parcelapp
 - **Repository PR:** ioBroker/ioBroker.repositories#5667 (MERGED 2026-05-10, im Latest-Repo)
@@ -31,7 +31,7 @@ src/lib/coerce.ts        → errText, coerceFiniteNumber strict, coerceString, c
 src/lib/parcel-client.ts → HTTPS-Client (Node.js built-in)
 src/lib/state-manager.ts → State CRUD + Cleanup + Berechnungen + createdIds-Cache
 src/lib/i18n-states.ts   → 18 STATE_NAMES × 11 Sprachen + ESTIMATE_LABELS + tName(key) für common.name
-scripts/sync-iopackage-from-i18n.py → hält io-package.json:instanceObjects synchron mit i18n-states.ts
+../scripts/sync-iopackage-from-i18n.py → hält io-package.json:instanceObjects synchron mit i18n-states.ts (zentral)
 ```
 
 ## Design-Entscheidungen
@@ -68,13 +68,13 @@ Run: `npm test` (vitest unit + mocha @iobroker/testing packageFiles).
 
 | Version | Highlights                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.4.9   | Community-standard event handler pattern (.bind + try/catch). |
 | 0.4.8   | **NUT-Konsistenz:** prettier ioBroker-Standard, dependabot double-quotes + TS-6-Kommentar, CI `fail_level: error`, `.releaseconfig.json` 2-Space, vitest `singleFork: false`, README Claude-footer-Fix. |
 | 0.4.7   | Internal cleanup: dead tsconfig settings entfernt. |
 | 0.4.6   | `scripts/sync-iopackage-from-i18n.py`. instanceObjects mit 11-Sprachen-Translations. |
 | 0.4.5   | **Toolchain-Parity:** TS ~6.0.3, vitest, eslint-config 2.3.4, release-script 5.2.0. Code-Cleanup. extIcon CSP-Fix. |
 | 0.4.4   | testClient cancelAll-Latency-Fix. |
 | 0.4.3   | Debug-Coverage-Welle (8-Klassen-Audit, Score 4.6→9.0). |
-| 0.4.2   | 17-Finding Hardening: cancelAll, AbortController, FORBIDDEN, collision-suffix, Retry-After clamp. |
 
 ## Befehle
 
