@@ -1,4 +1,6 @@
 import * as utils from "@iobroker/adapter-core";
+import { I18n } from "@iobroker/adapter-core";
+import { join } from "node:path";
 import { coerceClampedInt, errText } from "./lib/coerce";
 import { ParcelClient } from "./lib/parcel-client";
 import { StateManager } from "./lib/state-manager";
@@ -57,6 +59,7 @@ class ParcelappAdapter extends utils.Adapter {
 
   private async onReady(): Promise<void> {
     try {
+      await I18n.init(join(this.adapterDir, "admin"), this);
       this.log.debug(
         `onReady: starting (pollInterval=${JSON.stringify(this.config.pollInterval)}, autoRemoveDelivered=${this.config.autoRemoveDelivered})`,
       );

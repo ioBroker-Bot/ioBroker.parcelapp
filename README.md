@@ -123,6 +123,11 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+- User-modified state names are no longer overwritten on adapter restart
+- State name translations migrated to standard ioBroker i18n framework
+
 ### 0.4.9 (2026-05-21)
 
 - Use community-standard event handler pattern
@@ -185,4 +190,4 @@ SOFTWARE.
 
 ---
 
-*Developed with assistance from Claude.ai*
+_Developed with assistance from Claude.ai_

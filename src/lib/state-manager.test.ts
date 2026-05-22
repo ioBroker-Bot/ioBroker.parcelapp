@@ -1,3 +1,26 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+const i18nDir = join(__dirname, "../../admin/i18n");
+const i18nData: Record<string, Record<string, string>> = {};
+for (const f of readdirSync(i18nDir).filter(f => f.endsWith(".json"))) {
+  i18nData[f.replace(".json", "")] = JSON.parse(readFileSync(join(i18nDir, f), "utf8"));
+}
+let mockLang = "en";
+
+vi.mock("@iobroker/adapter-core", () => ({
+  I18n: {
+    getTranslatedObject: vi.fn((key: string) => {
+      const result: Record<string, string> = {};
+      for (const [lang, data] of Object.entries(i18nData)) {
+        result[lang] = data[key] ?? key;
+      }
+      return result;
+    }),
+    translate: vi.fn((key: string) => i18nData[mockLang]?.[key] ?? i18nData.en?.[key] ?? key),
+  },
+}));
+
 import { StateManager, resolveLanguage } from "./state-manager";
 import { STATUS_LABELS, SUPPORTED_LANGUAGES, FALLBACK_LANGUAGE } from "./types";
 import type { ParcelDelivery } from "./types";
@@ -29,7 +52,11 @@ interface MockAdapter {
   states: Map<string, StateValue>;
   metrics: MockAdapterMetrics;
   log: { debug: (msg: string) => void };
-  extendObjectAsync: (id: string, obj: Partial<ObjectDef>) => Promise<void>;
+  extendObjectAsync: (
+    id: string,
+    obj: Partial<ObjectDef>,
+    options?: { preserve?: { common?: string[] } },
+  ) => Promise<void>;
   setObjectNotExistsAsync: (id: string, obj: ObjectDef) => Promise<void>;
   setStateAsync: (id: string, state: StateValue) => Promise<void>;
   delObjectAsync: (id: string, opts?: { recursive: boolean }) => Promise<void>;
@@ -57,7 +84,11 @@ function createMockAdapter(): MockAdapter {
         debugMessages.push(msg);
       },
     },
-    extendObjectAsync: async (id: string, obj: Partial<ObjectDef>): Promise<void> => {
+    extendObjectAsync: async (
+      id: string,
+      obj: Partial<ObjectDef>,
+      _options?: { preserve?: { common?: string[] } },
+    ): Promise<void> => {
       const existing = objects.get(id) || { type: "", common: {}, native: {} };
       objects.set(id, {
         type: obj.type || existing.type,
@@ -118,6 +149,7 @@ describe("StateManager", () => {
   let manager: StateManager;
 
   beforeEach(() => {
+    mockLang = "de";
     adapter = createMockAdapter();
     manager = new StateManager(adapter as never, "de");
   });
@@ -540,6 +572,7 @@ describe("StateManager", () => {
     });
 
     it("should return 'today' for today delivery in English", async () => {
+      mockLang = "en";
       adapter = createMockAdapter();
       manager = new StateManager(adapter as never, "en");
 
@@ -574,6 +607,7 @@ describe("StateManager", () => {
     });
 
     it("should return 'tomorrow' for tomorrow delivery in English", async () => {
+      mockLang = "en";
       adapter = createMockAdapter();
       manager = new StateManager(adapter as never, "en");
 
@@ -609,6 +643,7 @@ describe("StateManager", () => {
     });
 
     it("should return 'in %d days' for future delivery in English", async () => {
+      mockLang = "en";
       adapter = createMockAdapter();
       manager = new StateManager(adapter as never, "en");
 
@@ -645,6 +680,7 @@ describe("StateManager", () => {
     });
 
     it("should return 'overdue' for overdue delivery in English", async () => {
+      mockLang = "en";
       adapter = createMockAdapter();
       manager = new StateManager(adapter as never, "en");
 
@@ -1224,6 +1260,7 @@ describe("StateManager", () => {
 
     it("should localize the today estimate in every language", async () => {
       for (const lang of EXPECTED_LANGUAGES) {
+        mockLang = lang;
         adapter = createMockAdapter();
         manager = new StateManager(adapter as never, lang);
 
@@ -1384,6 +1421,30 @@ describe("StateManager", () => {
       expect(adapter.metrics.setObjectNotExistsCalls).toBeGreaterThan(before);
       // And the states are back.
       expect(adapter.states.get(`deliveries.${pkgId}.carrier`)?.val).toBe("DHL");
+    });
+  });
+
+  describe("preserve option", () => {
+    it("extendObjectAsync is called with preserve for device objects", async () => {
+      const calls: { id: string; options: unknown }[] = [];
+      const spyAdapter = createMockAdapter();
+      const origExtend = spyAdapter.extendObjectAsync;
+      spyAdapter.extendObjectAsync = async (
+        id: string,
+        obj: Partial<ObjectDef>,
+        options?: { preserve?: { common?: string[] } },
+      ): Promise<void> => {
+        calls.push({ id, options });
+        return origExtend(id, obj, options);
+      };
+
+      const mgr = new StateManager(spyAdapter as never, "en");
+      const delivery = makeDelivery({ tracking_number: "PRESERVE1" });
+      await mgr.updateDelivery(delivery, "DHL");
+
+      const deviceCall = calls.find(c => c.id === "deliveries.preserve1");
+      expect(deviceCall).toBeDefined();
+      expect(deviceCall!.options).toEqual({ preserve: { common: ["name"] } });
     });
   });
 });

@@ -3,6 +3,19 @@
     "name": "parcelapp",
     "version": "0.4.9",
     "news": {
+      "NEXT": {
+        "en": "Preserve user-modified state names; state translations use standard ioBroker i18n",
+        "de": "Vom Benutzer geänderte Datenpunktnamen bleiben erhalten; Übersetzungen nutzen Standard-ioBroker-i18n",
+        "ru": "Пользовательские имена точек данных сохраняются; переводы используют стандартный i18n ioBroker",
+        "pt": "Nomes de pontos de dados modificados pelo utilizador são preservados; traduções usam i18n padrão do ioBroker",
+        "nl": "Door gebruiker gewijzigde namen van datapunten blijven behouden; vertalingen gebruiken standaard ioBroker-i18n",
+        "fr": "Les noms de points de données modifiés par l'utilisateur sont conservés ; les traductions utilisent l'i18n standard d'ioBroker",
+        "it": "I nomi dei punti dati modificati dall'utente vengono preservati; le traduzioni usano l'i18n standard di ioBroker",
+        "es": "Los nombres de puntos de datos modificados por el usuario se conservan; las traducciones usan i18n estándar de ioBroker",
+        "pl": "Nazwy punktów danych zmienione przez użytkownika są zachowywane; tłumaczenia używają standardowego i18n ioBroker",
+        "uk": "Змінені користувачем назви точок даних зберігаються; переклади використовують стандартний i18n ioBroker",
+        "zh-cn": "保留用户修改的数据点名称；翻译使用标准 ioBroker i18n"
+      },
       "0.4.9": {
         "en": "Use community-standard event handler pattern",
         "de": "Community-Standard Event-Handler-Pattern verwenden",
@@ -80,19 +93,6 @@
         "pl": "Adapter zamyka się poprawnie nawet jeśli przycisk Test Connection wciąż działał — żądanie testowe jest teraz przerywane przy zwolnieniu.",
         "uk": "Адаптер коректно завершує роботу навіть якщо Test Connection ще виконувався — тестовий запит тепер скасовується під час вивантаження.",
         "zh-cn": "即使测试连接按钮仍在运行，适配器也能干净地关闭——测试请求现在会在卸载时中止。"
-      },
-      "0.4.3": {
-        "en": "Debug log traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling. Default log unchanged.",
-        "de": "Debug-Log dokumentiert stille Pfade: HTTPS-Request-Lifecycle, Carrier-Liste, Per-Paket-Updates und Admin-Message-Handling. Default-Log unverändert.",
-        "ru": "Журнал отладки прослеживает тихие пути: цикл HTTPS-запроса, получение списка перевозчиков, обновления посылок и обработка сообщений. Стандартный лог не изменился.",
-        "pt": "Log de depuração rastreia caminhos silenciosos: ciclo HTTPS, lista de transportadoras, atualizações por encomenda e mensagens admin. Log padrão inalterado.",
-        "nl": "Debug-log volgt stille paden: HTTPS-cyclus, vervoerderslijst, pakketupdates en admin-berichten. Standaard log ongewijzigd.",
-        "fr": "Le journal de débogage trace les chemins silencieux : cycle HTTPS, liste des transporteurs, mises à jour de colis et messages admin. Journal par défaut inchangé.",
-        "it": "Log di debug traccia percorsi silenziosi: ciclo HTTPS, elenco corrieri, aggiornamenti pacchi e messaggi admin. Log predefinito invariato.",
-        "es": "Log de depuración rastrea rutas silenciosas: ciclo HTTPS, lista de transportistas, actualizaciones de paquetes y mensajes de admin. Log por defecto sin cambios.",
-        "pl": "Log debugowania śledzi ciche ścieżki: cykl HTTPS, lista przewoźników, aktualizacje paczek i wiadomości admin. Domyślny log bez zmian.",
-        "uk": "Журнал зневадження відстежує тихі шляхи: цикл HTTPS, список перевізників, оновлення посилок та повідомлення адміна. Стандартний лог без змін.",
-        "zh-cn": "调试日志跟踪以前静默的路径：HTTPS 请求生命周期、承运商列表、每个包裹更新以及管理消息处理。默认日志保持不变。"
       }
     },
     "titleLang": {
