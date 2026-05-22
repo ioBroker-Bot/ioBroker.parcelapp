@@ -6,7 +6,7 @@
 
 **ioBroker Parcel Tracking Adapter** — Paketverfolgung über [parcel.app](https://parcelapp.net) API. Alle Carrier die parcel.app unterstützt, ein API-Key (Premium).
 
-- **Version:** 0.4.9 (Community-standard handler pattern). Vorgänger **0.4.8** (released 2026-05-19) — NUT-Konsistenz. v0.4.7 Internal cleanup. v0.4.6 instanceObjects i18n. v0.4.5 Toolchain-Parity. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
+- **Version:** 0.5.0 (Preserve + i18n migration). Vorgänger **0.4.9** community-standard handler. v0.4.8 NUT-Konsistenz. v0.4.7 Internal cleanup. v0.4.6 instanceObjects i18n. v0.4.5 Toolchain-Parity. v0.4.4 testClient cancelAll-Latency-Fix. v0.4.3 Debug-Coverage-Welle. v0.4.2 17-Finding Hardening.
 - **GitHub:** https://github.com/krobipd/ioBroker.parcelapp
 - **npm:** https://www.npmjs.com/package/iobroker.parcelapp
 - **Repository PR:** ioBroker/ioBroker.repositories#5667 (MERGED 2026-05-10, im Latest-Repo)
@@ -30,8 +30,8 @@ src/lib/types.ts         → Interfaces, Status-Labels (11 Sprachen)
 src/lib/coerce.ts        → errText, coerceFiniteNumber strict, coerceString, coerceBoolean, isPlainObject, isTrueish
 src/lib/parcel-client.ts → HTTPS-Client (Node.js built-in)
 src/lib/state-manager.ts → State CRUD + Cleanup + Berechnungen + createdIds-Cache
-src/lib/i18n-states.ts   → 18 STATE_NAMES × 11 Sprachen + ESTIMATE_LABELS + tName(key) für common.name
-../scripts/sync-iopackage-from-i18n.py → hält io-package.json:instanceObjects synchron mit i18n-states.ts (zentral)
+src/lib/i18n.ts          → tName: type-safe I18n.getTranslatedObject wrapper (keys from admin/i18n/en.json)
+../scripts/sync-iopackage-from-i18n.py → hält io-package.json:instanceObjects synchron mit admin/i18n (zentral, source: admin-i18n)
 ```
 
 ## Design-Entscheidungen
@@ -50,7 +50,7 @@ src/lib/i18n-states.ts   → 18 STATE_NAMES × 11 Sprachen + ESTIMATE_LABELS + t
 
 0=Zugestellt, 1=Eingefroren, 2=Unterwegs, 3=Abholung, 4=In Zustellung, 5=Nicht gefunden, 6=Zustellversuch, 7=Ausnahme, 8=Registriert
 
-## Tests (175 unit + 57 package + 1 integration = 233)
+## Tests (180 unit + 57 package + 1 integration = 238)
 
 ```
 src/lib/coerce.test.ts         → errText, coerceFiniteNumber strict (HEX/Exp rejected), coerceString, coerceBoolean, isPlainObject, isTrueish (~25)
@@ -66,21 +66,21 @@ Run: `npm test` (vitest unit + mocha @iobroker/testing packageFiles).
 
 ## Versionshistorie (letzte 7)
 
-| Version | Highlights                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version | Highlights                                                                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.5.0   | **Preserve + i18n (mcm-Feedback)**: `extendObjectAsync` with `{ preserve: { common: ["name"] } }`. Private `i18n-states.ts` replaced by adapter-core `I18n.getTranslatedObject()` + `I18n.translate()`. `admin/i18n` migrated from Pattern A (subdirs) to flat files (38 keys × 11 langs). ESTIMATE_LABELS migrated to `I18n.translate()`. Tests 175→180 unit. |
 | 0.4.9   | Community-standard event handler pattern (.bind + try/catch). |
 | 0.4.8   | **NUT-Konsistenz:** prettier ioBroker-Standard, dependabot double-quotes + TS-6-Kommentar, CI `fail_level: error`, `.releaseconfig.json` 2-Space, vitest `singleFork: false`, README Claude-footer-Fix. |
 | 0.4.7   | Internal cleanup: dead tsconfig settings entfernt. |
 | 0.4.6   | `scripts/sync-iopackage-from-i18n.py`. instanceObjects mit 11-Sprachen-Translations. |
 | 0.4.5   | **Toolchain-Parity:** TS ~6.0.3, vitest, eslint-config 2.3.4, release-script 5.2.0. Code-Cleanup. extIcon CSP-Fix. |
 | 0.4.4   | testClient cancelAll-Latency-Fix. |
-| 0.4.3   | Debug-Coverage-Welle (8-Klassen-Audit, Score 4.6→9.0). |
 
 ## Befehle
 
 ```bash
 npm run build        # Production (esbuild)
-npm test             # vitest run (175 unit) + mocha (57 package)
+npm test             # vitest run (180 unit) + mocha (57 package)
 npm run lint         # ESLint + Prettier
 npm run check        # tsc --noEmit (TS 6)
 npm run coverage     # vitest coverage report
