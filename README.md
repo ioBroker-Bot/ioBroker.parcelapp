@@ -123,22 +123,25 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+- Changelog rewritten in user-centric style across all versions.
+
 ### 0.5.1 (2026-05-23)
 
-- CI check-and-lint updated to Node.js 24
+- Internal cleanup. No user-facing changes.
 
 ### 0.5.0 (2026-05-22)
 
 - User-modified state names are no longer overwritten on adapter restart
-- State name translations migrated to standard ioBroker i18n framework
 
 ### 0.4.9 (2026-05-21)
 
-- Use community-standard event handler pattern
+- Improved error handling and stability.
 
 ### 0.4.8 (2026-05-19)
 
-- Code quality enforced with standard formatting.
+- Internal cleanup. No user-facing changes.
 
 ### 0.4.7 (2026-05-17)
 

@@ -13,14 +13,14 @@
 
 ## 0.4.3 (2026-05-13)
 
-- Debug log now traces previously silent paths: HTTPS request lifecycle, carrier-list fetch outcome, per-delivery updates, admin-message handling and lifecycle anchors. Default log unchanged.
+- Improved debug logging for easier diagnosis of API and delivery tracking issues.
 
 ## 0.4.2 (2026-05-10)
 
 - Adapter shuts down cleanly even if parcel.app is slow — pending requests are aborted instead of hanging until kill.
 - "Forbidden" responses (e.g. when the Premium subscription is no longer active) now log a clear hint pointing to your parcel.app account, instead of looping reauth as if the API key were just wrong.
 - Two parcels whose tracking numbers differ only in special characters no longer overwrite each other in the state tree — the second one gets a hash suffix.
-- Defensive: bogus poll-interval values can no longer turn into a tight loop hammering the API; rate-limit cooldowns can no longer get stuck near zero.
+- Invalid poll-interval values can no longer turn into a tight loop; rate-limit cooldowns can no longer get stuck near zero.
 
 ## 0.4.1 (2026-05-09)
 
@@ -57,7 +57,7 @@
 
 ## 0.2.15 (2026-04-26)
 
-- Crash defense: process-level error handlers catch unexpected errors and restart cleanly.
+- Improved crash resilience — unexpected errors are now caught and the adapter restarts cleanly.
 
 ## 0.2.14 (2026-04-23)
 
@@ -69,11 +69,11 @@
 
 ## 0.2.12 (2026-04-18)
 
-- API-drift hardening: malformed responses no longer crash the adapter.
+- Malformed API responses no longer crash the adapter.
 
 ## 0.2.11 (2026-04-12)
 
-- Fix: response-stream errors handled, per-delivery poll failures isolated, safer message and unload handling.
+- Improved error handling and stability.
 
 ## 0.2.10 (2026-04-12)
 
@@ -113,7 +113,7 @@
 
 ## 0.2.1 (2026-03-25)
 
-- API rate-limit detection (HTTP 429) with cooldown. Connection-error deduplication. Poll throttling.
+- API rate-limit detection with automatic cooldown. Fewer duplicate error messages in the log.
 
 ## 0.2.0 (2026-03-25)
 
