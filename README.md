@@ -123,7 +123,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.5.2 (2026-05-23)
 
 - Changelog rewritten in user-centric style across all versions.
 
@@ -140,10 +140,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 - Improved error handling and stability.
 
 ### 0.4.8 (2026-05-19)
-
-- Internal cleanup. No user-facing changes.
-
-### 0.4.7 (2026-05-17)
 
 - Internal cleanup. No user-facing changes.
 

@@ -1,4 +1,8 @@
 # Older Changes
+## 0.4.7 (2026-05-17)
+
+- Internal cleanup. No user-facing changes.
+
 ## 0.4.6 (2026-05-17)
 
 - Localized "Adapter Information" and "Connection status" labels into 11 languages — previously English only.
