@@ -435,7 +435,7 @@ class StateManager {
       });
       this.createdIds.add(id);
     }
-    await this.adapter.setStateAsync(id, { val, ack: true });
+    await this.adapter.setStateChangedAsync(id, { val, ack: true });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

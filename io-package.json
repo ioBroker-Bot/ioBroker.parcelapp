@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "news": {
+      "0.5.3": {
+        "en": "Reduced unnecessary state-change events by skipping writes when the value has not changed.",
+        "de": "Unnötige State-Change-Events reduziert, indem Schreibvorgänge bei unverändertem Wert übersprungen werden.",
+        "ru": "Сокращены ненужные события изменения состояний путём пропуска записи при неизменённом значении.",
+        "pt": "Eventos de mudança de estado desnecessários reduzidos ao ignorar escritas quando o valor não mudou.",
+        "nl": "Onnodige state-change-events verminderd door schrijfacties over te slaan als de waarde niet is gewijzigd.",
+        "fr": "Réduction des événements de changement d'état inutiles en ignorant les écritures lorsque la valeur n'a pas changé.",
+        "it": "Ridotti gli eventi di cambio stato non necessari saltando le scritture quando il valore non è cambiato.",
+        "es": "Reducidos los eventos de cambio de estado innecesarios omitiendo escrituras cuando el valor no ha cambiado.",
+        "pl": "Zmniejszono niepotrzebne zdarzenia zmiany stanu, pomijając zapisy gdy wartość się nie zmieniła.",
+        "uk": "Зменшено непотрібні події зміни стану шляхом пропуску запису при незміненому значенні.",
+        "zh-cn": "通过在值未更改时跳过写入来减少不必要的状态变更事件。"
+      },
       "0.5.2": {
         "en": "Changelog rewritten in user-centric style across all versions.",
         "de": "Changelog in benutzerorientiertem Stil über alle Versionen neu geschrieben.",
@@ -80,19 +93,6 @@
         "pl": "Wewnętrzne porządki. Brak widocznych zmian dla użytkownika.",
         "uk": "Внутрішнє прибирання. Без видимих змін для користувача.",
         "zh-cn": "内部清理。无用户可见的更改。"
-      },
-      "0.4.6": {
-        "en": "Localized adapter info and connection status labels into 11 languages.",
-        "de": "Adapter-Info und Verbindungsstatus-Labels in 11 Sprachen lokalisiert.",
-        "ru": "Локализованы метки информации адаптера и статуса подключения на 11 языков.",
-        "pt": "Etiquetas de informação do adaptador e estado de ligação localizadas em 11 idiomas.",
-        "nl": "Adapterinformatie- en verbindingsstatuslabels gelokaliseerd in 11 talen.",
-        "fr": "Libellés d'information adaptateur et état de connexion localisés en 11 langues.",
-        "it": "Etichette informazioni adattatore e stato connessione localizzate in 11 lingue.",
-        "es": "Etiquetas de información del adaptador y estado de conexión localizadas en 11 idiomas.",
-        "pl": "Zlokalizowano etykiety informacji adaptera i statusu połączenia w 11 językach.",
-        "uk": "Локалізовано мітки інформації адаптера та стану з'єднання 11 мовами.",
-        "zh-cn": "将适配器信息和连接状态标签本地化为11种语言。"
       }
     },
     "titleLang": {

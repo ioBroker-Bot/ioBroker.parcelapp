@@ -123,6 +123,10 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### 0.5.3 (2026-05-23)
+
+- Reduced unnecessary state-change events by skipping writes when the value has not changed.
+
 ### 0.5.2 (2026-05-23)
 
 - Changelog rewritten in user-centric style across all versions.
@@ -138,10 +142,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 ### 0.4.9 (2026-05-21)
 
 - Improved error handling and stability.
-
-### 0.4.8 (2026-05-19)
-
-- Internal cleanup. No user-facing changes.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

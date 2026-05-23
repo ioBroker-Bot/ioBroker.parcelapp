@@ -260,7 +260,7 @@ class ParcelappAdapter extends utils.Adapter {
         this.log.info("Connection restored");
         this.lastErrorCode = "";
       }
-      await this.setStateAsync("info.connection", { val: true, ack: true });
+      await this.setStateChangedAsync("info.connection", { val: true, ack: true });
       const activeDeliveries = deliveries.filter((d) => this.stateManager.parseStatus(d) !== 0);
       const visibleDeliveries = autoRemoveMode ? activeDeliveries : deliveries;
       this.stateManager.resetPollState();

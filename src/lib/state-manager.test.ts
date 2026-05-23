@@ -59,6 +59,7 @@ interface MockAdapter {
   ) => Promise<void>;
   setObjectNotExistsAsync: (id: string, obj: ObjectDef) => Promise<void>;
   setStateAsync: (id: string, state: StateValue) => Promise<void>;
+  setStateChangedAsync: (id: string, state: StateValue) => Promise<void>;
   delObjectAsync: (id: string, opts?: { recursive: boolean }) => Promise<void>;
   getObjectViewAsync: (
     design: string,
@@ -103,6 +104,9 @@ function createMockAdapter(): MockAdapter {
       }
     },
     setStateAsync: async (id: string, state: StateValue): Promise<void> => {
+      states.set(id, state);
+    },
+    setStateChangedAsync: async (id: string, state: StateValue): Promise<void> => {
       states.set(id, state);
     },
     delObjectAsync: async (id: string, _opts?: { recursive: boolean }): Promise<void> => {
