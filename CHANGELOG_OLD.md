@@ -1,4 +1,8 @@
 # Older Changes
+## 0.4.9 (2026-05-21)
+
+- Improved error handling and stability.
+
 ## 0.4.8 (2026-05-19)
 
 - Internal cleanup. No user-facing changes.

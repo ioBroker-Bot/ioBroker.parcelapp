@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "parcelapp",
-    "version": "0.5.3",
+    "version": "0.6.0",
     "news": {
-      "NEXT": {
+      "0.6.0": {
         "en": "Bug fixes: correct combined delivery window, packages with an unknown status stay visible, and newly added deliveries appear immediately.",
         "de": "Fehlerbehebungen: korrektes kombiniertes Lieferfenster, Pakete mit unbekanntem Status bleiben sichtbar, und neue Sendungen erscheinen sofort.",
         "ru": "Исправления: корректное объединённое окно доставки, посылки с неизвестным статусом остаются видимыми, новые посылки появляются сразу.",

@@ -123,7 +123,7 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.6.0 (2026-05-31)
 
 - The summary delivery window now covers the full time range when several packages are expected the same day — previously an overlapping window could be cut short.
 - Packages reported with an unrecognized status are no longer mistaken for delivered and removed; they stay visible as "Unknown".
@@ -144,10 +144,6 @@ The delivery is added to your parcel.app account and immediately appears in ioBr
 ### 0.5.0 (2026-05-22)
 
 - User-modified state names are no longer overwritten on adapter restart
-
-### 0.4.9 (2026-05-21)
-
-- Improved error handling and stability.
 
 Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
